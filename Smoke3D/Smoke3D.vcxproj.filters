@@ -1,0 +1,170 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hh;hpp;hxx;hm;inl;inc;xsd</Extensions>
+    </Filter>
+    <Filter Include="Resource Files">
+      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
+    </Filter>
+    <Filter Include="XSDX">
+      <UniqueIdentifier>{f1faff23-04ed-4f5b-9d77-bb1381f0c18e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="XSDX\Source Files">
+      <UniqueIdentifier>{217f6206-7de8-43b5-a227-e47e7a83564c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="XSDX\Header Files">
+      <UniqueIdentifier>{60810008-4864-43d4-9246-69ed05e10293}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Common">
+      <UniqueIdentifier>{db0eb2ef-bd50-4489-b934-8e76d95c52c8}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Shaders">
+      <UniqueIdentifier>{41953ae1-6cd1-470e-b004-069ffe5f95d3}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="ReadMe.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="targetver.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Resource.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Smoke3D.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="pch.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="XSDX\XSDXBuffer.h">
+      <Filter>XSDX\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="XSDX\XSDXShader.h">
+      <Filter>XSDX\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="XSDX\XSDXShaderCommon.h">
+      <Filter>XSDX\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="XSDX\XSDXSharedConst.h">
+      <Filter>XSDX\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="XSDX\XSDXState.h">
+      <Filter>XSDX\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="XSDX\XSDXType.h">
+      <Filter>XSDX\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Common\DirectXHelper.h">
+      <Filter>Common</Filter>
+    </ClInclude>
+    <ClInclude Include="Content\Fluid3D.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Content\Poisson3D.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Content\ShaderCommon3D.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Content\SharedMacros.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="Smoke3D.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="pch.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="XSDX\XSDXBuffer.cpp">
+      <Filter>XSDX\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="XSDX\XSDXShader.cpp">
+      <Filter>XSDX\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="XSDX\XSDXState.cpp">
+      <Filter>XSDX\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Content\Fluid3D.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Content\Poisson3D.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="Smoke3D.rc">
+      <Filter>Resource Files</Filter>
+    </ResourceCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="small.ico">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="Smoke3D.ico">
+      <Filter>Resource Files</Filter>
+    </Image>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Content\CHConstants.hlsli">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="Content\CSJacobi3D.hlsli">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="Content\CSGaussSeidel3D.hlsli">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="Content\CSGradient3D.hlsli">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="Content\CSDivergence3D.hlsli">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="Content\CSAdvect3D.hlsli">
+      <Filter>Shaders</Filter>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <FxCompile Include="Content\CSAdvect3D.hlsl">
+      <Filter>Shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="Content\CSBound3D.hlsl">
+      <Filter>Shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="Content\CSDivergence3D.hlsl">
+      <Filter>Shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="Content\CSImpulse3D.hlsl">
+      <Filter>Shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="Content\CSPressure3D.hlsl">
+      <Filter>Shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="Content\CSDiffuse3D.hlsl">
+      <Filter>Shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="Content\CSProject3D.hlsl">
+      <Filter>Shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="Content\PSRayCast.hlsl">
+      <Filter>Shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="Content\VSRayCast.hlsl">
+      <Filter>Shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="Content\CSTemporal3D.hlsl">
+      <Filter>Shaders</Filter>
+    </FxCompile>
+  </ItemGroup>
+</Project>
