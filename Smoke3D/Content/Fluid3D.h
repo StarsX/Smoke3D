@@ -30,6 +30,7 @@ public:
 
 protected:
 	void createConstBuffers();
+	void computeDual(const uint8_t uCS);
 	void advect();
 	void diffuse(const uint8_t uIteration);
 	void impulse(const XSDX::CPDXShaderResourceView &pImpulseSRV);
@@ -37,10 +38,10 @@ protected:
 	void project();
 	void bound();
 
-	XSDX::spTexture3D	m_pTxVelocity;
-	XSDX::spTexture3D	m_pTxAdvVelocity;
-	XSDX::spTexture3D	m_pTxDensity;
-	XSDX::spTexture3D	m_pTxAdvDensity;
+	XSDX::spTexture3D	m_pSrcVelocity;
+	XSDX::spTexture3D	m_pDstVelocity;
+	XSDX::spTexture3D	m_pSrcDensity;
+	XSDX::spTexture3D	m_pDstDensity;
 
 	uint8_t				m_uCBPerFrame;
 	uint8_t				m_uUASlot;

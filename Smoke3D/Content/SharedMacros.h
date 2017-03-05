@@ -6,4 +6,4 @@
 #define THREAD_BLOCK_Y		8
 #define THREAD_BLOCK_Z		8
 
-#define REST_DENS			0.56
+#define REST_DENS			0.75

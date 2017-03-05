@@ -23,18 +23,16 @@ public:
 	void Advect(const XSDX::CPDXShaderResourceView &srvSource);
 	void SwapBuffers();
 
-	const XSDX::spTexture3D	&GetKnown() const;
-	const XSDX::spTexture3D	&GetResult() const;
+	const XSDX::spTexture3D	&GetSrc() const;
+	const XSDX::spTexture3D	&GetDst() const;
 
 protected:
 	void gaussSeidel();
 	void jacobi();
 
-	bool				m_bPingpong;
-
-	XSDX::spTexture3D	m_pTxKnown;
-	XSDX::spTexture3D	m_pTxUnknown;
-	XSDX::spTexture3D	m_pTxPingpong;
+	XSDX::spTexture3D	m_pSrcKnown;
+	XSDX::spTexture3D	m_pSrcUnknown;
+	XSDX::spTexture3D	m_pDstUnknown;
 
 	uint8_t				m_uCSIteration;
 	uint8_t				m_uCSTemporal;

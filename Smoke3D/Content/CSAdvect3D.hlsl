@@ -31,7 +31,7 @@ void main(uint3 DTid : SV_DispatchThreadID)
 {
 	// Velocity tracing
 	const half3 vU = g_roVelocity[DTid];
-	const half3 vTex = (DTid + 0.5) * g_vTexel - vU;
+	const half3 vTex = (DTid + 0.5) * g_vTexel - vU * g_fDeltaTime;
 
 	// Update velocity and density
 	g_rwVelocity[DTid] = g_roVelocity.SampleLevel(g_smpLinear, vTex, 0);

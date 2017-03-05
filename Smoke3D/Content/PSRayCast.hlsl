@@ -69,7 +69,7 @@ half GetSample(const half3 vTex)
 #elif defined(CUBE_TEST)
 	return 1.0;
 #else
-	return min(g_roDensity.SampleLevel(g_smpLinear, vTex, 0), 10.0);
+	return min(g_roDensity.SampleLevel(g_smpLinear, vTex, 0), 16.0);
 #endif
 }
 

@@ -228,7 +228,7 @@ void CALLBACK OnMouse(bool bLeftButtonDown, bool bRightButtonDown, bool bMiddleB
 	bool bSideButton1Down, bool bSideButton2Down, int nMouseWheelDelta,
 	int xPos, int yPos, void *pUserContext)
 {
-	static const float fForceScl = 200.0f;
+	static const float fForceScl = 2000.0f;
 	static bool bStart = true;
 	if (bLeftButtonDown)
 	{
@@ -256,12 +256,12 @@ void CALLBACK OnMouse(bool bLeftButtonDown, bool bRightButtonDown, bool bMiddleB
 			if (fStrength > 0.0000001f)
 			{
 				const auto vForceDir = vForce / fStrength;
-				XMStoreFloat4(&g_vForceDens, vForceDir * max(fStrength, 30.0f));
+				XMStoreFloat4(&g_vForceDens, vForceDir * max(fStrength, 300.0f));
 				g_vImLoc.x = min(max(g_vMouse.x * 0.5f + 0.5f, 0.1f), 0.9f);
 				g_vImLoc.y = min(max(g_vMouse.y * 0.5f + 0.5f, 0.1f), 0.9f);
 				g_vImLoc.z = min(max(g_vMouse.z * 0.5f + 0.5f, 0.1f), 0.9f);
 				g_vForceDens.y += g_fGravity;
-				g_vForceDens.w = 2.5f;
+				g_vForceDens.w = 0.25f;
 			}
 		}
 		XMStoreFloat3(&g_vMouse, vPos);
@@ -288,7 +288,7 @@ void CALLBACK OnKeyboard(UINT nChar, bool bKeyDown, bool bAltDown, void* pUserCo
 		case 'V':
 			g_bViscous = !g_bViscous; break;
 		case 'J':
-			g_vForceDens = XMFLOAT4(0.0f, g_fGravity - 30.0f, 0.0f, 2.5f);
+			g_vForceDens = XMFLOAT4(0.0f, g_fGravity - 300.0f, 0.0f, 0.25f);
 			break;
 		}
 	}
@@ -459,7 +459,7 @@ void CALLBACK OnD3D11FrameRender(ID3D11Device* pd3dDevice, ID3D11DeviceContext* 
 	pd3dImmediateContext->PSSetConstantBuffers(2u, 1u, g_pCBPerObject.GetAddressOf());
 
 	// Render
-	g_pFluid->Simulate(min(fElapsedTime, DELTA_TIME), g_vForceDens, g_vImLoc, g_bViscous ? 10ui8 : 0ui8);
+	g_pFluid->Simulate(max(fElapsedTime, DELTA_TIME), g_vForceDens, g_vImLoc, g_bViscous ? 10ui8 : 0ui8);
 	g_pFluid->Render();
 
 	DXUT_BeginPerfEvent(DXUT_PERFEVENTCOLOR, L"HUD / Stats");
