@@ -16,7 +16,7 @@ public:
 	void Init(const uint32_t uWidth, const uint32_t uHeight, const uint32_t uDepth);
 	void Simulate(
 		const float fDeltaTime,
-		const XSDX::CPDXShaderResourceView &pImpulseSRV,
+		const XSDX::CPDXShaderResourceView &pSRVImpulse,
 		const uint8_t uItVisc = VISC_ITERATION
 		);
 	void Simulate(
@@ -25,15 +25,16 @@ public:
 		const DirectX::XMFLOAT3 vImLoc = DirectX::XMFLOAT3(0, 0, 0),
 		const uint8_t uItVisc = VISC_ITERATION
 		);
-	void Render(const XSDX::CPDXShaderResourceView &pDepthSRV);
+	void Render(const XSDX::CPDXShaderResourceView &pSRVDepth);
 	void Render();
 
 protected:
 	void createConstBuffers();
-	void computeDual(const uint8_t uCS);
-	void advect();
+	void advect(const float fDeltaTime);
+	void advect(const float fDeltaTime, const XSDX::CPDXShaderResourceView &pSRVVelocity,
+		const uint8_t uCS = ShaderIDs::g_uCSAdvect);
 	void diffuse(const uint8_t uIteration);
-	void impulse(const XSDX::CPDXShaderResourceView &pImpulseSRV);
+	void impulse(const XSDX::CPDXShaderResourceView &pSRVImpulse);
 	void impulse();
 	void project();
 	void bound();
@@ -48,6 +49,7 @@ protected:
 	uint8_t				m_uSRField;
 	uint8_t				m_uSmpLinearClamp;
 
+	DirectX::XMFLOAT4	m_vPerFrames[2];
 	DirectX::XMFLOAT3	m_vSimSize;
 	DirectX::XMUINT3	m_vThreadGroupSize;
 

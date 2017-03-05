@@ -55,33 +55,18 @@ void Fluid3D::Init(uint32_t uWidth, uint32_t uHeight, uint32_t uDepth)
 
 void Fluid3D::Simulate(const float fDeltaTime, const DirectX::XMFLOAT4 vForceDens, const DirectX::XMFLOAT3 vImLoc, const uint8_t uItVisc)
 {
-	const auto cbPerFrame = array<XMFLOAT4, 2>
-	{ { vForceDens, XMFLOAT4(vImLoc.x, vImLoc.y, vImLoc.z, fDeltaTime) } };
-	m_pDXContext->UpdateSubresource(m_pCBPerFrame.Get(), 0u, nullptr, cbPerFrame.data(), 0u, 0u);
+	m_vPerFrames[0] = vForceDens;
+	m_vPerFrames[1] = XMFLOAT4(vImLoc.x, vImLoc.y, vImLoc.z, fDeltaTime);
+	m_pDXContext->UpdateSubresource(m_pCBPerFrame.Get(), 0u, nullptr, m_vPerFrames, 0u, 0u);
 	m_pDXContext->CSSetConstantBuffers(m_uCBPerFrame, 1u, m_pCBPerFrame.GetAddressOf());
 
-	advect();			// Vel -> AdvVel, Den -> AdvDen
-	// UAV: AdvVel, AdvDen, SRV: Vel, Den
-	diffuse(uItVisc);	// AdvVel -> Vel
-	// UAV: Vel, AdvDen, SRV: AdvVel, DffPp
-	// UAV: null, AdvDen, SRV: null, null
-	impulse();			// Vel -> AdvVel, AdvDen -> Den
-	// UAV: AdvVel, Den, SRV: Vel, AdvDen
-	project();			// AdvVel -> Vel, Vel -> AdvVel, AdvVel -> Vel
-	// UAV: PrsKn, Den, SRV: AdvVel, AdvDen
-	// UAV: null, Den, SRV: null, AdvDen
-	// UAV: PrsUk, Den, SRV: PrsKn, AdvDen
-	// UAV: null, Den, SRV: null, null
-	// UAV: Vel, Den, SRV: AdvVel, null
-	// UAV: AdvVel, Den, SRV: Vel, PrsUk
-	// UAV: Vel, Den, SRV: AdvVel, PrsUk
-	// UAV: PrsPp, Den, SRV: PrsUK, Vel		// temporal
-	// UAV: null, Den, SRV: Vel, PrsUK		// temporal
+	advect(fDeltaTime);
+	diffuse(uItVisc);
+	impulse();
+	project();
 
 	const auto pUAVs = array<LPDXUnorderedAccessView, 2>{ { nullptr, nullptr } };
-	const auto pSRVs = array<LPDXShaderResourceView, 2>{ { nullptr, nullptr } };
 	m_pDXContext->CSSetUnorderedAccessViews(m_uUASlot, 2u, pUAVs.data(), &g_uNullUint);
-	m_pDXContext->CSSetShaderResources(m_uSRField, 2u, pSRVs.data());
 }
 
 void Fluid3D::Render()
@@ -124,35 +109,47 @@ void Fluid3D::createConstBuffers()
 	m_pDXContext->CSSetConstantBuffers(0u, 1u, m_pCBImmutable.GetAddressOf());
 }
 
-void Fluid3D::computeDual(const uint8_t uCS)
+void Fluid3D::advect(const float fDeltaTime)
 {
+	auto pSrcVelocity = m_pSrcVelocity->GetSRV();
+	advect(fDeltaTime, pSrcVelocity);
+	
+#if 0
+	m_pDiffuse->SwapBuffers(true);
+	pSrcVelocity = m_pDiffuse->GetTmp()->GetSRV();
+	advect(-fDeltaTime, pSrcVelocity);
+
+	advect(fDeltaTime, pSrcVelocity, g_uCSAdvectMC);
+#endif
+}
+
+void Fluid3D::advect(const float fDeltaTime, const XSDX::CPDXShaderResourceView& pSRVVelocity, const uint8_t uCS)
+{
+	m_vPerFrames[1].w = fDeltaTime;
+	m_pDXContext->UpdateSubresource(m_pCBPerFrame.Get(), 0u, nullptr, m_vPerFrames, 0u, 0u);
+
 	// Setup
 	const auto pUAVs = array<LPDXUnorderedAccessView, 2>
 	{ { m_pDstVelocity->GetUAV().Get(), m_pDstDensity->GetUAV().Get() } };
-	const auto pSRVs = array<LPDXShaderResourceView, 2>
-	{ { m_pSrcVelocity->GetSRV().Get(), m_pSrcDensity->GetSRV().Get() } };
+	const auto pSRVs = array<LPDXShaderResourceView, 3>
+	{ { m_pSrcVelocity->GetSRV().Get(), m_pSrcDensity->GetSRV().Get(), pSRVVelocity.Get() } };
 	m_pDXContext->CSSetUnorderedAccessViews(m_uUASlot, 2u, pUAVs.data(), &g_uNullUint);
-	m_pDXContext->CSSetShaderResources(m_uSRField, 2u, pSRVs.data());
+	m_pDXContext->CSSetShaderResources(m_uSRField, 3u, pSRVs.data());
+	m_pDXContext->CSSetSamplers(m_uSmpLinearClamp, 1u, m_pState->LinearClamp().GetAddressOf());
 
-	// Compute dual destinations (velocity and density)
-	m_pDXContext->CSSetShader(m_pShader->GetComputeShader(uCS).Get(), nullptr, 0u);
+	// Advect velocity and density
+	m_pDXContext->CSSetShader(m_pShader->GetComputeShader(g_uCSAdvect).Get(), nullptr, 0u);
 	m_pDXContext->Dispatch(m_vThreadGroupSize.x, m_vThreadGroupSize.y, m_vThreadGroupSize.z);
 
 	// Unset
-	const auto pNullSRVs = array<LPDXShaderResourceView, 2>{ { nullptr, nullptr } };
-	m_pDXContext->CSSetShaderResources(m_uSRField, 2u, pNullSRVs.data());
+	const auto pNullSRVs = array<LPDXShaderResourceView, 3>{ { nullptr, nullptr, nullptr } };
+	m_pDXContext->CSSetShaderResources(m_uSRField, 3u, pNullSRVs.data());
 
 	// Swap buffers
 	m_pDiffuse->SwapBuffers();
 	m_pSrcVelocity = m_pDiffuse->GetSrc();
 	m_pDstVelocity = m_pDiffuse->GetDst();
 	m_pSrcDensity.swap(m_pDstDensity);
-}
-
-void Fluid3D::advect()
-{
-	m_pDXContext->CSSetSamplers(m_uSmpLinearClamp, 1u, m_pState->LinearClamp().GetAddressOf());
-	computeDual(g_uCSAdvect);
 }
 
 void Fluid3D::diffuse(const uint8_t uIteration)
@@ -167,7 +164,27 @@ void Fluid3D::diffuse(const uint8_t uIteration)
 
 void Fluid3D::impulse()
 {
-	computeDual(g_uCSImpulse);
+	// Setup
+	const auto pUAVs = array<LPDXUnorderedAccessView, 2>
+	{ { m_pDstVelocity->GetUAV().Get(), m_pDstDensity->GetUAV().Get() } };
+	const auto pSRVs = array<LPDXShaderResourceView, 2>
+	{ { m_pSrcVelocity->GetSRV().Get(), m_pSrcDensity->GetSRV().Get() } };
+	m_pDXContext->CSSetUnorderedAccessViews(m_uUASlot, 2u, pUAVs.data(), &g_uNullUint);
+	m_pDXContext->CSSetShaderResources(m_uSRField, 2u, pSRVs.data());
+
+	// Add force and density
+	m_pDXContext->CSSetShader(m_pShader->GetComputeShader(g_uCSImpulse).Get(), nullptr, 0u);
+	m_pDXContext->Dispatch(m_vThreadGroupSize.x, m_vThreadGroupSize.y, m_vThreadGroupSize.z);
+
+	// Unset
+	const auto pNullSRVs = array<LPDXShaderResourceView, 2>{ { nullptr, nullptr } };
+	m_pDXContext->CSSetShaderResources(m_uSRField, 2u, pNullSRVs.data());
+
+	// Swap buffers
+	m_pDiffuse->SwapBuffers();
+	m_pSrcVelocity = m_pDiffuse->GetSrc();
+	m_pDstVelocity = m_pDiffuse->GetDst();
+	m_pSrcDensity.swap(m_pDstDensity);
 }
 
 void Fluid3D::project()

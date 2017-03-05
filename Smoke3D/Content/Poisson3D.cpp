@@ -123,9 +123,10 @@ void Poisson3D::Advect(const CPDXShaderResourceView &srvSource)
 	SwapBuffers();
 }
 
-void Poisson3D::SwapBuffers()
+void Poisson3D::SwapBuffers(bool bUnknown)
 {
-	m_pSrcKnown.swap(m_pDstUnknown);
+	if (bUnknown) m_pSrcUnknown.swap(m_pDstUnknown);
+	else m_pSrcKnown.swap(m_pDstUnknown);
 }
 
 const spTexture3D &Poisson3D::GetSrc() const
@@ -136,6 +137,11 @@ const spTexture3D &Poisson3D::GetSrc() const
 const spTexture3D &Poisson3D::GetDst() const
 {
 	return m_pDstUnknown;
+}
+
+const spTexture3D &Poisson3D::GetTmp() const
+{
+	return m_pSrcUnknown;
 }
 
 void Poisson3D::gaussSeidel()
