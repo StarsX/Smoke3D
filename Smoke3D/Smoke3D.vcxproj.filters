@@ -166,5 +166,8 @@
     <FxCompile Include="Content\CSTemporal3D.hlsl">
       <Filter>Shaders</Filter>
     </FxCompile>
+    <FxCompile Include="Content\CSMacCormack3D.hlsl">
+      <Filter>Shaders</Filter>
+    </FxCompile>
   </ItemGroup>
 </Project>

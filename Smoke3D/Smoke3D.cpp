@@ -339,6 +339,7 @@ HRESULT CALLBACK OnD3D11CreateDevice(ID3D11Device* pd3dDevice, const DXGI_SURFAC
 	auto loadVSTask = g_pShader->CreateVertexShader(L"VSRayCast.cso", g_uVSRayCast);
 	auto loadPSTask = g_pShader->CreatePixelShader(L"PSRayCast.cso", g_uPSRayCast);
 	auto loadCSTask = g_pShader->CreateComputeShader(L"CSAdvect3D.cso", g_uCSAdvect);
+	loadCSTask = loadCSTask && g_pShader->CreateComputeShader(L"CSMacCormack3D.cso", g_uCSMacCormack);
 	loadCSTask = loadCSTask && g_pShader->CreateComputeShader(L"CSDiffuse3D.cso", g_uCSDiffuse);
 	loadCSTask = loadCSTask && g_pShader->CreateComputeShader(L"CSImpulse3D.cso", g_uCSImpulse);
 	loadCSTask = loadCSTask && g_pShader->CreateComputeShader(L"CSDivergence3D.cso", g_uCSDiv);

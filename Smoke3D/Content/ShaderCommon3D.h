@@ -14,7 +14,7 @@ namespace ShaderIDs
 
 	// Compute shaders
 	static auto			g_uCSAdvect		(0ui8);
-	static auto			g_uCSAdvectMC	(1ui8);
+	static auto			g_uCSMacCormack	(1ui8);
 	static auto			g_uCSDiffuse	(2ui8);
 	static auto			g_uCSImpulse	(3ui8);
 	static auto			g_uCSDiv		(4ui8);

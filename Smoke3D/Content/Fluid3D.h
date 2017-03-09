@@ -31,8 +31,8 @@ public:
 protected:
 	void createConstBuffers();
 	void advect(const float fDeltaTime);
-	void advect(const float fDeltaTime, const XSDX::CPDXShaderResourceView &pSRVVelocity,
-		const uint8_t uCS = ShaderIDs::g_uCSAdvect);
+	void advect(const float fDeltaTime, const XSDX::CPDXShaderResourceView &pSRVVelocity);
+	void macCormack(const float fDeltaTime, const XSDX::CPDXShaderResourceView &pSRVVelocity);
 	void diffuse(const uint8_t uIteration);
 	void impulse(const XSDX::CPDXShaderResourceView &pSRVImpulse);
 	void impulse();
@@ -43,6 +43,7 @@ protected:
 	XSDX::spTexture3D	m_pDstVelocity;
 	XSDX::spTexture3D	m_pSrcDensity;
 	XSDX::spTexture3D	m_pDstDensity;
+	XSDX::spTexture3D	m_pTmpDensity;
 
 	uint8_t				m_uCBPerFrame;
 	uint8_t				m_uUASlot;

@@ -53,6 +53,7 @@ namespace XSDX
 		const CPDXSamplerState		&PointWrap();
 		const CPDXSamplerState		&PointClamp();
 		const CPDXSamplerState		&PointBorder();
+		const CPDXSamplerState		&PointComparison();
 		const CPDXSamplerState		&LinearWrap();
 		const CPDXSamplerState		&LinearClamp();
 		const CPDXSamplerState		&LinearBorder();
@@ -60,6 +61,7 @@ namespace XSDX
 		const CPDXSamplerState		&AnisotropicWrap();
 		const CPDXSamplerState		&AnisotropicClamp();
 		const CPDXSamplerState		&AnisotropicBorder();
+		const CPDXSamplerState		&AnisotropicComparison();
 	protected:
 		CPDXBlendState				m_pOpaque;
 		CPDXBlendState				m_pAlphaBlend;
@@ -85,6 +87,7 @@ namespace XSDX
 		CPDXSamplerState			m_pPointWrap;
 		CPDXSamplerState			m_pPointClamp;
 		CPDXSamplerState			m_pPointBorder;
+		CPDXSamplerState			m_pPointComparison;
 		CPDXSamplerState			m_pLinearWrap;
 		CPDXSamplerState			m_pLinearClamp;
 		CPDXSamplerState			m_pLinearBorder;
@@ -92,6 +95,7 @@ namespace XSDX
 		CPDXSamplerState			m_pAnisotropicWrap;
 		CPDXSamplerState			m_pAnisotropicClamp;
 		CPDXSamplerState			m_pAnisotropicBorder;
+		CPDXSamplerState			m_pAnisotropicComparison;
 
 		CPDXDevice					m_pDXDevice;
 	};

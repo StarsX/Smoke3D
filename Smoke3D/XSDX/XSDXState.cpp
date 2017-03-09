@@ -258,7 +258,7 @@ const CPDXDepthStencilState &State::DepthReadLess()
 	return m_pDepthReadLess;
 }
 
-const CPDXDepthStencilState & XSDX::State::DepthReadEqual()
+const CPDXDepthStencilState &State::DepthReadEqual()
 {
 	if (!m_pDepthReadEqual)
 		CreateDepthStencilState(m_pDepthReadEqual, true, false, D3D11_COMPARISON_EQUAL);
@@ -330,6 +330,20 @@ const CPDXSamplerState &State::PointBorder()
 	return m_pPointBorder;
 }
 
+const CPDXSamplerState &State::PointComparison()
+{
+	if (!m_pPointComparison)
+		CreateSamplerState(
+			m_pPointComparison,
+			D3D11_FILTER_COMPARISON_MIN_MAG_MIP_POINT,
+			D3D11_TEXTURE_ADDRESS_BORDER,
+			D3D11_COMPARISON_LESS_EQUAL,
+			1.0f
+			);
+
+	return m_pPointComparison;
+}
+
 const CPDXSamplerState &State::LinearWrap()
 {
 	if (!m_pLinearWrap)
@@ -390,4 +404,18 @@ const CPDXSamplerState &State::AnisotropicBorder()
 		CreateSamplerState(m_pAnisotropicBorder, D3D11_FILTER_ANISOTROPIC, D3D11_TEXTURE_ADDRESS_BORDER);
 
 	return m_pAnisotropicBorder;
+}
+
+const CPDXSamplerState &State::AnisotropicComparison()
+{
+	if (!m_pAnisotropicComparison)
+		CreateSamplerState(
+			m_pAnisotropicComparison,
+			D3D11_FILTER_COMPARISON_ANISOTROPIC,
+			D3D11_TEXTURE_ADDRESS_BORDER,
+			D3D11_COMPARISON_LESS_EQUAL,
+			1.0f
+			);
+
+	return m_pAnisotropicComparison;
 }
