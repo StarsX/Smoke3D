@@ -50,8 +50,7 @@ void Texture2D::Create(const bool bUAV, const bool bDyn, const uint32_t uWidth, 
 
 	if (pInitialData)
 	{
-		const auto bufferInitData = D3D11_SUBRESOURCE_DATA
-		{ pInitialData, uStride * uWidth, 0u };
+		const auto bufferInitData = D3D11_SUBRESOURCE_DATA { pInitialData, uStride * uWidth, 0u };
 		DX::ThrowIfFailed(m_pDXDevice->CreateTexture2D(&textureDesc, &bufferInitData, &m_pTexture));
 	}
 	else DX::ThrowIfFailed(m_pDXDevice->CreateTexture2D(&textureDesc, nullptr, &m_pTexture));
