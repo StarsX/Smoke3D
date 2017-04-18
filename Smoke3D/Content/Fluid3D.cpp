@@ -120,7 +120,7 @@ void Fluid3D::advect(const float fDeltaTime)
 	advect(fDeltaTime, pSrcVelocity);
 	
 #ifdef _MACCORMACK_
-	m_pDiffuse->SwapBuffers(true);
+	m_pDiffuse->SwapTextures(true);
 	m_pDstVelocity = m_pDiffuse->GetDst();
 	pSrcVelocity = m_pDiffuse->GetTmp()->GetSRV();
 	m_pTmpDensity.swap(m_pDstDensity);
@@ -153,7 +153,7 @@ void Fluid3D::advect(const float fDeltaTime, const CPDXShaderResourceView& pSRVV
 	m_pDXContext->CSSetShaderResources(m_uSRField, 3u, pNullSRVs.data());
 
 	// Swap buffers
-	m_pDiffuse->SwapBuffers();
+	m_pDiffuse->SwapTextures();
 	m_pSrcVelocity = m_pDiffuse->GetSrc();
 	m_pDstVelocity = m_pDiffuse->GetDst();
 	m_pSrcDensity.swap(m_pDstDensity);
@@ -185,7 +185,7 @@ void Fluid3D::macCormack(const float fDeltaTime, const CPDXShaderResourceView& p
 	m_pDXContext->CSSetShaderResources(m_uSRField, 4u, pNullSRVs.data());
 
 	// Swap buffers
-	m_pDiffuse->SwapBuffers();
+	m_pDiffuse->SwapTextures();
 	m_pSrcVelocity = m_pDiffuse->GetSrc();
 	m_pDstVelocity = m_pDiffuse->GetDst();
 	m_pSrcDensity.swap(m_pDstDensity);
@@ -220,7 +220,7 @@ void Fluid3D::impulse()
 	m_pDXContext->CSSetShaderResources(m_uSRField, 2u, pNullSRVs.data());
 
 	// Swap buffers
-	m_pDiffuse->SwapBuffers();
+	m_pDiffuse->SwapTextures();
 	m_pSrcVelocity = m_pDiffuse->GetSrc();
 	m_pDstVelocity = m_pDiffuse->GetDst();
 	m_pSrcDensity.swap(m_pDstDensity);
@@ -250,7 +250,7 @@ void Fluid3D::project()
 		m_pDXContext->CSSetShaderResources(m_uSRField, 2u, pNullSRVs.data());
 
 		// Swap buffers
-		m_pDiffuse->SwapBuffers();
+		m_pDiffuse->SwapTextures();
 		m_pSrcVelocity = m_pDiffuse->GetSrc();
 		m_pDstVelocity = m_pDiffuse->GetDst();
 	}
@@ -277,7 +277,7 @@ void Fluid3D::bound()
 	m_pDXContext->CSSetShaderResources(m_uSRField, 1u, &g_pNullSRV);
 
 	// Swap buffers
-	m_pDiffuse->SwapBuffers();
+	m_pDiffuse->SwapTextures();
 	m_pSrcVelocity = m_pDiffuse->GetSrc();
 	m_pDstVelocity = m_pDiffuse->GetDst();
 }

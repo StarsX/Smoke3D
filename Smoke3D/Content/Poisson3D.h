@@ -21,7 +21,7 @@ public:
 	void ComputeDivergence(const XSDX::CPDXShaderResourceView &srvSource);
 	void SolvePoisson(const uint8_t uIteration = 1ui8);
 	void Advect(const XSDX::CPDXShaderResourceView &srvSource);
-	void SwapBuffers(bool bUnknown = false);
+	void SwapTextures(bool bUnknown = false);
 
 	const XSDX::spTexture3D	&GetSrc() const;
 	const XSDX::spTexture3D	&GetDst() const;

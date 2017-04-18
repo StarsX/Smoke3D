@@ -80,7 +80,7 @@ void Poisson3D::ComputeDivergence(const CPDXShaderResourceView &srvSource)
 	m_pDXContext->CSSetUnorderedAccessViews(m_uUASlot, 1u, &g_pNullUAV, &g_uNullUint);
 
 	// Swap buffers
-	SwapBuffers();
+	SwapTextures();
 }
 
 void Poisson3D::SolvePoisson(const uint8_t uIteration)
@@ -98,7 +98,7 @@ void Poisson3D::SolvePoisson(const uint8_t uIteration)
 	m_pDXContext->CSSetUnorderedAccessViews(m_uUASlot, 1u, &g_pNullUAV, &g_uNullUint);
 
 	// Swap buffers
-	SwapBuffers();
+	SwapTextures();
 }
 
 void Poisson3D::Advect(const CPDXShaderResourceView &srvSource)
@@ -120,10 +120,10 @@ void Poisson3D::Advect(const CPDXShaderResourceView &srvSource)
 	m_pDXContext->CSSetUnorderedAccessViews(m_uUASlot, 1u, &g_pNullUAV, &g_uNullUint);
 
 	// Swap buffers
-	SwapBuffers();
+	SwapTextures();
 }
 
-void Poisson3D::SwapBuffers(bool bUnknown)
+void Poisson3D::SwapTextures(bool bUnknown)
 {
 	if (bUnknown) m_pSrcUnknown.swap(m_pDstUnknown);
 	else m_pSrcKnown.swap(m_pDstUnknown);
