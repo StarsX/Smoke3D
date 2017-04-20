@@ -15,10 +15,10 @@ void main(uint3 DTid : SV_DispatchThreadID)
 	// Unordered Gauss-Seidel iteration
 	for (uint i = 0; i < 1024; ++i)
 	{
-		const half fPressPRev = g_rwUnknown[DTid];
+		const half fPressPrev = g_rwUnknown[DTid];
 		const half fPress = GaussSeidel(vf, DTid);
 		
-		if (abs(fPress - fPressPRev) < 0.0000001) return;
+		if (abs(fPress - fPressPrev) < 0.0000001) return;
 		g_rwUnknown[DTid] = fPress;
 	}
 }

@@ -45,8 +45,8 @@ void Poisson3D::Init(const uint32_t uWidth, const uint32_t uHeight, const uint32
 	// Create 3D textures
 	m_pSrcKnown = make_shared<Texture3D>(m_pDXDevice);
 	m_pDstUnknown = make_shared<Texture3D>(m_pDXDevice);
-	m_pSrcKnown->Create(true, false, uWidth, uHeight, uDepth, format);
-	m_pDstUnknown->Create(true, false, uWidth, uHeight, uDepth, format, 1ui8, vData.data(), uStride);
+	m_pSrcKnown->Create(true, false, uWidth, uHeight, uDepth, format, 1ui8, vData.data(), uStride);
+	m_pDstUnknown->Create(true, false, uWidth, uHeight, uDepth, format);
 
 	if (format != DXGI_FORMAT_R32_FLOAT && format != DXGI_FORMAT_R16_FLOAT)
 	{
@@ -123,7 +123,7 @@ void Poisson3D::Advect(const CPDXShaderResourceView &srvSource)
 	SwapTextures();
 }
 
-void Poisson3D::SwapTextures(bool bUnknown)
+void Poisson3D::SwapTextures(const bool bUnknown)
 {
 	if (bUnknown) m_pSrcUnknown.swap(m_pDstUnknown);
 	else m_pSrcKnown.swap(m_pDstUnknown);
