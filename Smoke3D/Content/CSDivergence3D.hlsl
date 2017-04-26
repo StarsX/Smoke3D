@@ -7,8 +7,8 @@
 //--------------------------------------------------------------------------------------
 // Textures
 //--------------------------------------------------------------------------------------
-RWTexture3D<half>	g_rwDivergence	: register(u0);
-Texture3D<half3>	g_roVector		: register(t0);
+RWTexture3D<half>	g_rwDivergence	: register (u0);
+Texture3D<half3>	g_roVector		: register (t0);
 
 //--------------------------------------------------------------------------------------
 // Compute divergence

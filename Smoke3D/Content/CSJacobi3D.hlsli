@@ -7,8 +7,8 @@
 //--------------------------------------------------------------------------------------
 // Textures
 //--------------------------------------------------------------------------------------
-Texture3D<halfV>	g_roKnown	: register(t0);
-Texture3D<halfV>	g_roUnknown	: register(t1);
+Texture3D<halfV>	g_roKnown	: register (t0);
+Texture3D<halfV>	g_roUnknown	: register (t1);
 
 //--------------------------------------------------------------------------------------
 // Jacobi iteration

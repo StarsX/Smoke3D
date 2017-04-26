@@ -157,16 +157,13 @@
     <FxCompile Include="Content\CSProject3D.hlsl">
       <Filter>Shaders</Filter>
     </FxCompile>
-    <FxCompile Include="Content\PSRayCast.hlsl">
-      <Filter>Shaders</Filter>
-    </FxCompile>
-    <FxCompile Include="Content\VSRayCast.hlsl">
-      <Filter>Shaders</Filter>
-    </FxCompile>
     <FxCompile Include="Content\CSTemporal3D.hlsl">
       <Filter>Shaders</Filter>
     </FxCompile>
     <FxCompile Include="Content\CSMacCormack3D.hlsl">
+      <Filter>Shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="Content\CSRayCast.hlsl">
       <Filter>Shaders</Filter>
     </FxCompile>
   </ItemGroup>

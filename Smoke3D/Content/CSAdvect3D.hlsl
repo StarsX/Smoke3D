@@ -16,11 +16,11 @@ static const float g_fDecay = 0.996;
 //--------------------------------------------------------------------------------------
 // Textures
 //--------------------------------------------------------------------------------------
-RWTexture3D<half3>	g_rwPhiVel		: register(u0);
-RWTexture3D<half>	g_rwPhiDen		: register(u1);
-Texture3D<half3>	g_roPhiVel		: register(t0);
-Texture3D<half>		g_roPhiDen		: register(t1);
-Texture3D<half3>	g_roVelocity	: register(t2);
+RWTexture3D<half3>	g_rwPhiVel		: register (u0);
+RWTexture3D<half>	g_rwPhiDen		: register (u1);
+Texture3D<half3>	g_roPhiVel		: register (t0);
+Texture3D<half>		g_roPhiDen		: register (t1);
+Texture3D<half3>	g_roVelocity	: register (t2);
 
 //--------------------------------------------------------------------------------------
 // Texture samplers

@@ -7,10 +7,10 @@
 //--------------------------------------------------------------------------------------
 // Textures
 //--------------------------------------------------------------------------------------
-RWTexture3D<half3>	g_rwVelocity	: register(u0);
-RWTexture3D<half>	g_rwDensity		: register(u1);
-Texture3D<half3>	g_roVelocity	: register(t0);
-Texture3D<half>		g_roDensity		: register(t1);
+RWTexture3D<half3>	g_rwVelocity	: register (u0);
+RWTexture3D<half>	g_rwDensity		: register (u1);
+Texture3D<half3>	g_roVelocity	: register (t0);
+Texture3D<half>		g_roDensity		: register (t1);
 
 //--------------------------------------------------------------------------------------
 // Gaussian distribution

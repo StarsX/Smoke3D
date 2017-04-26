@@ -13,12 +13,14 @@ using namespace ShaderIDs;
 using namespace XSDX;
 
 const auto g_pNullSRV = static_cast<LPDXShaderResourceView>(nullptr);	// Helper to Clear SRVs
+const auto g_pNullUAV = static_cast<LPDXUnorderedAccessView>(nullptr);	// Helper to Clear UAVs
 const auto g_uNullUint = 0u;											// Helper to Clear Buffers
 
 Fluid3D::Fluid3D(const CPDXDevice &pDXDevice, const spShader &pShader, const spState &pState) :
 	m_pDXDevice(pDXDevice),
 	m_pShader(pShader),
 	m_pState(pState),
+	m_uCBImmutable(0ui8),
 	m_uCBPerFrame(1ui8),
 	m_uUASlot(0ui8),
 	m_uSRField(0ui8),
@@ -27,7 +29,7 @@ Fluid3D::Fluid3D(const CPDXDevice &pDXDevice, const spShader &pShader, const spS
 	m_pDiffuse = make_unique<Poisson3D>(pDXDevice, pShader, pState);
 	m_pPressure = make_unique<Poisson3D>(pDXDevice, pShader, pState);
 	m_pDiffuse->SetShaders(g_uCSDiffuse);
-	m_pPressure->SetShaders(g_uCSPressure, g_uCSTemporal, g_uCSDiv);
+	m_pPressure->SetShaders(g_uCSPressure, g_uCSTemporal, g_uCSDivergence);
 	m_pDXDevice->GetImmediateContext(&m_pDXContext);
 }
 
@@ -62,8 +64,9 @@ void Fluid3D::Simulate(const float fDeltaTime, const DirectX::XMFLOAT4 vForceDen
 {
 	m_vPerFrames[0] = vForceDens;
 	m_vPerFrames[1] = XMFLOAT4(vImLoc.x, vImLoc.y, vImLoc.z, fDeltaTime);
+	const auto pCBs = array<LPDXBuffer, 2>{ { m_pCBImmutable.Get(), m_pCBPerFrame.Get() } };
 	m_pDXContext->UpdateSubresource(m_pCBPerFrame.Get(), 0u, nullptr, m_vPerFrames, 0u, 0u);
-	m_pDXContext->CSSetConstantBuffers(m_uCBPerFrame, 1u, m_pCBPerFrame.GetAddressOf());
+	m_pDXContext->CSSetConstantBuffers(m_uCBImmutable, 2u, pCBs.data());
 
 	advect(fDeltaTime);
 	diffuse(uItVisc);
@@ -74,29 +77,25 @@ void Fluid3D::Simulate(const float fDeltaTime, const DirectX::XMFLOAT4 vForceDen
 	m_pDXContext->CSSetUnorderedAccessViews(m_uUASlot, 2u, pUAVs.data(), &g_uNullUint);
 }
 
-void Fluid3D::Render()
+void Fluid3D::Render(const XSDX::CPDXUnorderedAccessView &pUAVSwapChain)
 {
-	m_pDXContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-	//m_pDXContext->IASetVertexBuffers(0u, 1u, &g_pNullBuffer, &g_iNullUint, &g_iNullUint);
+	auto pSrc = CPDXResource();
+	auto desc = D3D11_TEXTURE2D_DESC();
+	pUAVSwapChain->GetResource(&pSrc);
+	static_cast<LPDXTexture2D>(pSrc.Get())->GetDesc(&desc);
 
-	m_pDXContext->VSSetShader(m_pShader->GetVertexShader(g_uVSRayCast).Get(), nullptr, 0u);
-	m_pDXContext->GSSetShader(nullptr, nullptr, 0u);
-	m_pDXContext->PSSetShader(m_pShader->GetPixelShader(g_uPSRayCast).Get(), nullptr, 0u);
-	
-	m_pDXContext->PSSetShaderResources(m_uSRField, 1u, m_pSrcDensity->GetSRV().GetAddressOf());
-	m_pDXContext->PSSetSamplers(m_uSmpLinearClamp, 1u, m_pState->LinearClamp().GetAddressOf());
+	// Setup
+	m_pDXContext->CSSetUnorderedAccessViews(m_uUASlot, 1u, pUAVSwapChain.GetAddressOf(), &g_uNullUint);
+	m_pDXContext->CSSetShaderResources(m_uSRField, 1u, m_pSrcDensity->GetSRV().GetAddressOf());
+	m_pDXContext->CSSetSamplers(m_uSmpLinearClamp, 1u, m_pState->LinearClamp().GetAddressOf());
 
-	m_pDXContext->OMSetBlendState(m_pState->NonPremultiplied().Get(), nullptr, D3D11_DEFAULT_SAMPLE_MASK);
+	// Advect velocity and density
+	m_pDXContext->CSSetShader(m_pShader->GetComputeShader(g_uCSRayCast).Get(), nullptr, 0u);
+	m_pDXContext->Dispatch(desc.Width / 32u, desc.Height / 16u, 1u);
 
-	m_pDXContext->Draw(36u, 0u);
-
-	m_pDXContext->OMSetBlendState(nullptr, nullptr, D3D11_DEFAULT_SAMPLE_MASK);
-
-	m_pDXContext->PSSetShaderResources(m_uSRField, 1u, &g_pNullSRV);
-
-	m_pDXContext->VSSetShader(nullptr, nullptr, 0);
-	m_pDXContext->PSSetShader(nullptr, nullptr, 0);
-	m_pDXContext->RSSetState(0);
+	// Unset
+	m_pDXContext->CSSetShaderResources(m_uSRField, 1u, &g_pNullSRV);
+	m_pDXContext->CSSetUnorderedAccessViews(m_uUASlot, 1u, &g_pNullUAV, &g_uNullUint);
 }
 
 void Fluid3D::createConstBuffers()
@@ -110,8 +109,6 @@ void Fluid3D::createConstBuffers()
 	desc.Usage = D3D11_USAGE_IMMUTABLE;
 	const auto dsd = D3D11_SUBRESOURCE_DATA{ &cbImmutable };
 	ThrowIfFailed(m_pDXDevice->CreateBuffer(&desc, &dsd, &m_pCBImmutable));
-
-	m_pDXContext->CSSetConstantBuffers(0u, 1u, m_pCBImmutable.GetAddressOf());
 }
 
 void Fluid3D::advect(const float fDeltaTime)

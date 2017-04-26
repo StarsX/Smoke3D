@@ -25,8 +25,8 @@ public:
 		const DirectX::XMFLOAT3 vImLoc = DirectX::XMFLOAT3(0, 0, 0),
 		const uint8_t uItVisc = VISC_ITERATION
 		);
-	void Render(const XSDX::CPDXShaderResourceView &pSRVDepth);
-	void Render();
+	void Render(const XSDX::CPDXUnorderedAccessView &pUAVDst, const XSDX::CPDXShaderResourceView &pSRVDepth);
+	void Render(const XSDX::CPDXUnorderedAccessView &pUAVDst);
 
 protected:
 	void createConstBuffers();
@@ -45,6 +45,7 @@ protected:
 	XSDX::spTexture3D	m_pDstDensity;
 	XSDX::spTexture3D	m_pTmpDensity;
 
+	uint8_t				m_uCBImmutable;
 	uint8_t				m_uCBPerFrame;
 	uint8_t				m_uUASlot;
 	uint8_t				m_uSRField;

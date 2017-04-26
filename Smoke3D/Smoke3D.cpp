@@ -39,6 +39,8 @@ CPDXBuffer						g_pCBMatrices;
 CPDXBuffer						g_pCBPerFrame;
 CPDXBuffer						g_pCBPerObject;
 
+CPDXUnorderedAccessView			g_pUAVSwapChain;
+
 XMFLOAT2						g_vViewport;
 XMFLOAT3						g_vMouse;
 XMFLOAT4						g_vForceDens;
@@ -122,7 +124,19 @@ int WINAPI wWinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, 
 	DXUTInit(true, true, nullptr); // Parse the command line, show msgboxes on error, no extra command line params
 	DXUTSetCursorSettings(false, true); // Show the cursor and clip it when in full screen
 	DXUTCreateWindow(L"Smoke 3D");
-	DXUTCreateDevice(D3D_FEATURE_LEVEL_11_0, true, 1280, 960);
+
+	auto deviceSettings = DXUTDeviceSettings();
+	DXUTApplyDefaultDeviceSettings(&deviceSettings);
+	deviceSettings.MinimumFeatureLevel = D3D_FEATURE_LEVEL_11_0;
+	// UAV cannot be DXGI_FORMAT_R8G8B8A8_UNORM_SRGB
+	deviceSettings.d3d11.sd.BufferDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
+	deviceSettings.d3d11.sd.BufferDesc.Width = 1280;
+	deviceSettings.d3d11.sd.BufferDesc.Height = 960;
+	deviceSettings.d3d11.sd.Windowed = true;
+	deviceSettings.d3d11.sd.BufferUsage |= DXGI_USAGE_UNORDERED_ACCESS;
+
+	DXUTCreateDeviceFromSettings(&deviceSettings);
+	//DXUTCreateDevice(D3D_FEATURE_LEVEL_11_0, true, 1280, 960);
 	DXUTMainLoop(); // Enter into the DXUT render loop
 
 #if defined(DEBUG) | defined(_DEBUG)
@@ -336,25 +350,25 @@ HRESULT CALLBACK OnD3D11CreateDevice(ID3D11Device* pd3dDevice, const DXGI_SURFAC
 	g_pFluid = make_unique<Fluid3D>(pd3dDevice, g_pShader, g_pState);
 	g_pFluid->Init(64u, 64u, 64u);
 
-	auto loadVSTask = g_pShader->CreateVertexShader(L"VSRayCast.cso", g_uVSRayCast);
-	auto loadPSTask = g_pShader->CreatePixelShader(L"PSRayCast.cso", g_uPSRayCast);
 	auto loadCSTask = g_pShader->CreateComputeShader(L"CSAdvect3D.cso", g_uCSAdvect);
 	loadCSTask = loadCSTask && g_pShader->CreateComputeShader(L"CSMacCormack3D.cso", g_uCSMacCormack);
 	loadCSTask = loadCSTask && g_pShader->CreateComputeShader(L"CSDiffuse3D.cso", g_uCSDiffuse);
 	loadCSTask = loadCSTask && g_pShader->CreateComputeShader(L"CSImpulse3D.cso", g_uCSImpulse);
-	loadCSTask = loadCSTask && g_pShader->CreateComputeShader(L"CSDivergence3D.cso", g_uCSDiv);
+	loadCSTask = loadCSTask && g_pShader->CreateComputeShader(L"CSDivergence3D.cso", g_uCSDivergence);
 	loadCSTask = loadCSTask && g_pShader->CreateComputeShader(L"CSPressure3D.cso", g_uCSPressure);
 	loadCSTask = loadCSTask && g_pShader->CreateComputeShader(L"CSProject3D.cso", g_uCSProject);
 	loadCSTask = loadCSTask && g_pShader->CreateComputeShader(L"CSBound3D.cso", g_uCSBound);
+	loadCSTask = loadCSTask && g_pShader->CreateComputeShader(L"CSRayCast.cso", g_uCSRayCast);
 
-	const auto createShaderTask = loadVSTask && loadPSTask && loadCSTask;
+	const auto createShaderTask = loadCSTask;
 
-	const auto createConstTask = create_task([pd3dDevice, pd3dImmediateContext]() {
+	const auto createConstTask = create_task([pd3dDevice, pd3dImmediateContext]()
+	{
 		// Setup constant buffers
 		auto desc = CD3D11_BUFFER_DESC(sizeof(CBMatrices), D3D11_BIND_CONSTANT_BUFFER);
 		ThrowIfFailed(pd3dDevice->CreateBuffer(&desc, nullptr, &g_pCBMatrices));
 
-		desc.ByteWidth = sizeof(XMVECTOR[2]);
+		desc.ByteWidth = sizeof(XMVECTOR[2]) + sizeof(XMMATRIX);
 		ThrowIfFailed(pd3dDevice->CreateBuffer(&desc, nullptr, &g_pCBPerObject));
 
 		desc.ByteWidth = sizeof(CBImmutable);
@@ -364,12 +378,11 @@ HRESULT CALLBACK OnD3D11CreateDevice(ID3D11Device* pd3dDevice, const DXGI_SURFAC
 		im.m_vAmbient = XMFLOAT4(1.0f, 1.0f, 1.0f, 0.08f);
 		const auto dsd = D3D11_SUBRESOURCE_DATA{ &im, 0, 0 };
 		ThrowIfFailed(pd3dDevice->CreateBuffer(&desc, &dsd, &g_pCBImmutable));
-
-		pd3dImmediateContext->PSSetConstantBuffers(0u, 1u, g_pCBImmutable.GetAddressOf());
 	});
 
 	// Once the cube is loaded, the object is ready to be rendered.
-	(createShaderTask && createConstTask).then([]() {
+	(createShaderTask && createConstTask).then([]()
+	{
 		g_pShader->ReleaseShaderBuffers();
 
 		// View
@@ -412,6 +425,27 @@ HRESULT CALLBACK OnD3D11ResizedSwapChain(ID3D11Device* pd3dDevice, IDXGISwapChai
 	D3D11_VIEWPORT viewport;
 	DXUTGetD3D11DeviceContext()->RSGetViewports(&iVpNum, &viewport);
 
+	// Get the back buffer
+	auto pBackBuffer = CPDXTexture2D();
+	ThrowIfFailed(pSwapChain->GetBuffer(0, IID_PPV_ARGS(&pBackBuffer)));
+
+	// Create UAV
+	const auto uavDesc = CD3D11_UNORDERED_ACCESS_VIEW_DESC(pBackBuffer.Get(), D3D11_UAV_DIMENSION_TEXTURE2D);
+	ThrowIfFailed(pd3dDevice->CreateUnorderedAccessView(pBackBuffer.Get(), &uavDesc, &g_pUAVSwapChain));
+
+#if defined(DEBUG) | defined(_DEBUG)
+	// Get the back buffer desc
+	auto backBufferSurfaceDesc = D3D11_TEXTURE2D_DESC();
+	pBackBuffer->GetDesc(&backBufferSurfaceDesc);
+
+	if (backBufferSurfaceDesc.BindFlags & D3D11_BIND_RENDER_TARGET)
+		MessageBox(nullptr, L"RTV flag is attached to the current swapchain!", L"RTV Flag Checking", 0u);
+	else MessageBox(nullptr, L"RTV flag is not attached to the current swapchain!", L"RTV Flag Checking", 0u);
+	if (backBufferSurfaceDesc.BindFlags & D3D11_BIND_UNORDERED_ACCESS)
+		MessageBox(nullptr, L"UAV flag is attached to the current swapchain!", L"UAV Flag Checking", 0u);
+	else MessageBox(nullptr, L"UAV flag is not attached to the current swapchain!", L"UAV Flag Checking", 0u);
+#endif
+
 	// Set window size dependent constants
 	g_vViewport = XMFLOAT2(viewport.Width, viewport.Height);
 
@@ -432,12 +466,8 @@ void CALLBACK OnD3D11FrameRender(ID3D11Device* pd3dDevice, ID3D11DeviceContext* 
 	// Loading is asynchronous. Only draw geometry after it's loaded.
 	if (!g_bLoadingComplete) return;
 
-	// Set render targets to the screen.
-	ID3D11RenderTargetView *pRTVs[] = { DXUTGetD3D11RenderTargetView() };
-	ID3D11DepthStencilView *pDSV = DXUTGetD3D11DepthStencilView();
-	pd3dImmediateContext->ClearRenderTargetView(pRTVs[0], DirectX::Colors::CornflowerBlue);
-	pd3dImmediateContext->ClearDepthStencilView(pDSV, D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
-	pd3dImmediateContext->OMSetRenderTargets(1, pRTVs, pDSV);
+	// Clear screen.
+	pd3dImmediateContext->ClearUnorderedAccessViewFloat(g_pUAVSwapChain.Get(), DirectX::Colors::CornflowerBlue);
 
 	// Prepare the constant buffer to send it to the graphics device.
 	// Get the projection & view matrix from the camera class
@@ -447,24 +477,43 @@ void CALLBACK OnD3D11FrameRender(ID3D11Device* pd3dDevice, ID3D11DeviceContext* 
 	const auto mViewProj = XMMatrixMultiply(mView, mProj);
 	const auto mWorldViewProj = XMMatrixMultiply(g_mWorld, mViewProj);
 
-	// Set VS constants
-	const auto cbMatrices = CBMatrices{ XMMatrixTranspose(mWorldViewProj) };
-	pd3dImmediateContext->UpdateSubresource(g_pCBMatrices.Get(), 0u, nullptr, &cbMatrices, 0u, 0u);
-	pd3dImmediateContext->VSSetConstantBuffers(0u, 1u, g_pCBMatrices.GetAddressOf());
+	// Set CS constants
+	struct CBPerObject
+	{
+		XMVECTOR vLocalSpaceLightPt;
+		XMVECTOR vLocalSpaceEyePt;
+		XMMATRIX mScreenToLocal;
+	} cbPerObject;
+	cbPerObject.vLocalSpaceLightPt = XMVector3TransformCoord(XMLoadFloat4(&g_vLightPt), mWorldI);
+	cbPerObject.vLocalSpaceEyePt = XMVector3TransformCoord(g_Camera.GetEyePt(), mWorldI);
 
-	// Set PS constants
-	auto cbPerObject = array<XMVECTOR, 2>();
-	cbPerObject[0] = XMVector3TransformCoord(XMLoadFloat4(&g_vLightPt), mWorldI);
-	cbPerObject[1] = XMVector3TransformCoord(g_Camera.GetEyePt(), mWorldI);
-	pd3dImmediateContext->UpdateSubresource(g_pCBPerObject.Get(), 0u, nullptr, cbPerObject.data(), 0u, 0u);
-	pd3dImmediateContext->PSSetConstantBuffers(2u, 1u, g_pCBPerObject.GetAddressOf());
+	const auto mToScreen = XMMATRIX
+	(
+		0.5f * g_vViewport.x, 0.0f, 0.0f, 0.0f,
+		0.0f, -0.5f * g_vViewport.y, 0.0f, 0.0f,
+		0.0f, 0.0f, 1.0f, 0.0f,
+		0.5f * g_vViewport.x, 0.5f * g_vViewport.y, 0.0f, 1.0f
+	);
+	const auto mLocalToScreen = XMMatrixMultiply(mWorldViewProj, mToScreen);
+	const auto mScreenToLocal = XMMatrixInverse(nullptr, mLocalToScreen);
+	cbPerObject.mScreenToLocal = XMMatrixTranspose(mScreenToLocal);
+	pd3dImmediateContext->UpdateSubresource(g_pCBPerObject.Get(), 0u, nullptr, &cbPerObject, 0u, 0u);
+
+	// Simulate
+	g_pFluid->Simulate(max(fElapsedTime, DELTA_TIME), g_vForceDens, g_vImLoc, g_bViscous ? 10ui8 : 0ui8);
+
+	pd3dImmediateContext->CSSetConstantBuffers(0u, 1u, g_pCBImmutable.GetAddressOf());
+	pd3dImmediateContext->CSSetConstantBuffers(2u, 1u, g_pCBPerObject.GetAddressOf());
 
 	// Render
-	g_pFluid->Simulate(max(fElapsedTime, DELTA_TIME), g_vForceDens, g_vImLoc, g_bViscous ? 10ui8 : 0ui8);
-	g_pFluid->Render();
+	g_pFluid->Render(g_pUAVSwapChain);
+
+	const auto pRTV = DXUTGetD3D11RenderTargetView();
+	pd3dImmediateContext->OMSetRenderTargets(1u, &pRTV, nullptr);
 
 	DXUT_BeginPerfEvent(DXUT_PERFEVENTCOLOR, L"HUD / Stats");
-	if (g_bShowFPS) {
+	if (g_bShowFPS)
+	{
 		g_SampleUI.OnRender(fElapsedTime);
 		RenderText();
 	}
@@ -488,6 +537,7 @@ void CALLBACK OnD3D11DestroyDevice(void* pUserContext)
 	DXUTGetGlobalResourceCache().OnDestroyDevice();
 
 	g_bLoadingComplete = false;
+	g_pUAVSwapChain.Reset();
 	g_pCBPerObject.Reset();
 	g_pCBPerFrame.Reset();
 	g_pCBMatrices.Reset();

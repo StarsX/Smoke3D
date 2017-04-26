@@ -7,8 +7,8 @@
 //--------------------------------------------------------------------------------------
 // Textures
 //--------------------------------------------------------------------------------------
-RWTexture3D<half>	g_rwUnknown	: register(u0);
-Texture3D<half>		g_roKnown	: register(t0);
+RWTexture3D<half>	g_rwUnknown	: register (u0);
+Texture3D<half>		g_roKnown	: register (t0);
 
 //--------------------------------------------------------------------------------------
 // Gauss-Seidel iteration

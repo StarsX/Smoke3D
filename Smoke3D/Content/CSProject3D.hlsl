@@ -7,9 +7,9 @@
 //--------------------------------------------------------------------------------------
 // Structured Buffers
 //--------------------------------------------------------------------------------------
-RWTexture3D<half3>	g_rwVelocity	: register(u0);
-Texture3D<half3>	g_roVelocity	: register(t0);
-Texture3D<half>		g_roPressure	: register(t1);
+RWTexture3D<half3>	g_rwVelocity	: register (u0);
+Texture3D<half3>	g_roVelocity	: register (t0);
+Texture3D<half>		g_roPressure	: register (t1);
 
 //--------------------------------------------------------------------------------------
 // Projection

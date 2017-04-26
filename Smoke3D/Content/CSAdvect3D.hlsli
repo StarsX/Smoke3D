@@ -7,9 +7,9 @@
 //--------------------------------------------------------------------------------------
 // Textures
 //--------------------------------------------------------------------------------------
-RWTexture3D<half>	g_rwScalar		: register(u0);
-Texture3D<half>		g_roScalar		: register(t0);
-Texture3D<half3>	g_roVelocity	: register(t1);
+RWTexture3D<half>	g_rwScalar		: register (u0);
+Texture3D<half>		g_roScalar		: register (t0);
+Texture3D<half3>	g_roVelocity	: register (t1);
 
 //--------------------------------------------------------------------------------------
 // Texture samplers
