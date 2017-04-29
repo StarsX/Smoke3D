@@ -35,8 +35,6 @@ spShader						g_pShader;
 spState							g_pState;
 
 CPDXBuffer						g_pCBImmutable;
-CPDXBuffer						g_pCBMatrices;
-CPDXBuffer						g_pCBPerFrame;
 CPDXBuffer						g_pCBPerObject;
 
 CPDXUnorderedAccessView			g_pUAVSwapChain;
@@ -128,6 +126,7 @@ int WINAPI wWinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, 
 	auto deviceSettings = DXUTDeviceSettings();
 	DXUTApplyDefaultDeviceSettings(&deviceSettings);
 	deviceSettings.MinimumFeatureLevel = D3D_FEATURE_LEVEL_11_0;
+	deviceSettings.d3d11.AutoCreateDepthStencil = false;
 	// UAV cannot be DXGI_FORMAT_R8G8B8A8_UNORM_SRGB
 	deviceSettings.d3d11.sd.BufferDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
 	deviceSettings.d3d11.sd.BufferDesc.Width = 1280;
@@ -365,10 +364,7 @@ HRESULT CALLBACK OnD3D11CreateDevice(ID3D11Device* pd3dDevice, const DXGI_SURFAC
 	const auto createConstTask = create_task([pd3dDevice, pd3dImmediateContext]()
 	{
 		// Setup constant buffers
-		auto desc = CD3D11_BUFFER_DESC(sizeof(CBMatrices), D3D11_BIND_CONSTANT_BUFFER);
-		ThrowIfFailed(pd3dDevice->CreateBuffer(&desc, nullptr, &g_pCBMatrices));
-
-		desc.ByteWidth = sizeof(XMVECTOR[2]) + sizeof(XMMATRIX);
+		auto desc = CD3D11_BUFFER_DESC(sizeof(XMVECTOR[2]) + sizeof(XMMATRIX), D3D11_BIND_CONSTANT_BUFFER);
 		ThrowIfFailed(pd3dDevice->CreateBuffer(&desc, nullptr, &g_pCBPerObject));
 
 		desc.ByteWidth = sizeof(CBImmutable);
@@ -425,6 +421,9 @@ HRESULT CALLBACK OnD3D11ResizedSwapChain(ID3D11Device* pd3dDevice, IDXGISwapChai
 	D3D11_VIEWPORT viewport;
 	DXUTGetD3D11DeviceContext()->RSGetViewports(&iVpNum, &viewport);
 
+	// Set window size dependent constants
+	g_vViewport = XMFLOAT2(viewport.Width, viewport.Height);
+
 	// Get the back buffer
 	auto pBackBuffer = CPDXTexture2D();
 	ThrowIfFailed(pSwapChain->GetBuffer(0, IID_PPV_ARGS(&pBackBuffer)));
@@ -445,9 +444,6 @@ HRESULT CALLBACK OnD3D11ResizedSwapChain(ID3D11Device* pd3dDevice, IDXGISwapChai
 		MessageBox(nullptr, L"UAV flag is attached to the current swapchain!", L"UAV Flag Checking", 0u);
 	else MessageBox(nullptr, L"UAV flag is not attached to the current swapchain!", L"UAV Flag Checking", 0u);
 #endif
-
-	// Set window size dependent constants
-	g_vViewport = XMFLOAT2(viewport.Width, viewport.Height);
 
 	//g_HUD.SetLocation(pBackBufferSurfaceDesc->Width - 170, 0);
 	//g_HUD.SetSize(170, 170);
@@ -539,8 +535,6 @@ void CALLBACK OnD3D11DestroyDevice(void* pUserContext)
 	g_bLoadingComplete = false;
 	g_pUAVSwapChain.Reset();
 	g_pCBPerObject.Reset();
-	g_pCBPerFrame.Reset();
-	g_pCBMatrices.Reset();
 	g_pCBImmutable.Reset();
 	g_pTxtHelper.reset();
 	g_pFluid.reset();
