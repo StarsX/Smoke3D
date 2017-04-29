@@ -22,7 +22,7 @@
     <ProjectGuid>{A02FA12D-42E8-487A-9FC0-1B1326E01A3A}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
     <RootNamespace>Smoke3D</RootNamespace>
-    <WindowsTargetPlatformVersion>10.0.14393.0</WindowsTargetPlatformVersion>
+    <WindowsTargetPlatformVersion>10.0.15063.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
