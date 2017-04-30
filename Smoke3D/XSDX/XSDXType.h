@@ -17,6 +17,13 @@
 namespace XSDX
 {
 	template<typename T>
+	inline T& dref(std::unique_ptr<T> &p)
+	{
+		assert(p);
+		return DREF(p);
+	}
+
+	template<typename T>
 	inline T& dref(std::shared_ptr<T> &p)
 	{
 		assert(p);

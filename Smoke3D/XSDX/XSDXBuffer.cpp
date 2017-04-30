@@ -51,9 +51,9 @@ void Texture2D::Create(const bool bUAV, const bool bDyn, const uint32_t uWidth, 
 	if (pInitialData)
 	{
 		const auto bufferInitData = D3D11_SUBRESOURCE_DATA { pInitialData, uStride * uWidth, 0u };
-		DX::ThrowIfFailed(m_pDXDevice->CreateTexture2D(&textureDesc, &bufferInitData, &m_pTexture));
+		ThrowIfFailed(m_pDXDevice->CreateTexture2D(&textureDesc, &bufferInitData, &m_pTexture));
 	}
-	else DX::ThrowIfFailed(m_pDXDevice->CreateTexture2D(&textureDesc, nullptr, &m_pTexture));
+	else ThrowIfFailed(m_pDXDevice->CreateTexture2D(&textureDesc, nullptr, &m_pTexture));
 
 	// Create SRV
 	const auto pTexture = m_pTexture.Get();
@@ -74,7 +74,7 @@ void Texture2D::Create(const bool bUAV, const bool bDyn, const uint32_t uWidth, 
 		// Create the unordered access view.
 		VEC_ALLOC(m_vpUAVs, uMips);
 		for (auto &pUAV : m_vpUAVs)
-			DX::ThrowIfFailed(m_pDXDevice->CreateUnorderedAccessView(pTexture, &uavDesc, &pUAV));
+			ThrowIfFailed(m_pDXDevice->CreateUnorderedAccessView(pTexture, &uavDesc, &pUAV));
 	}
 }
 
@@ -289,9 +289,9 @@ void RawBuffer::Create(const bool bVB, const bool bSO, const bool bSRV,
 	if (pInitialData)
 	{
 		const auto bufferInitData = D3D11_SUBRESOURCE_DATA{ pInitialData, 0u, 0u };
-		DX::ThrowIfFailed(m_pDXDevice->CreateBuffer(&bufferDesc, &bufferInitData, &m_pBuffer));
+		ThrowIfFailed(m_pDXDevice->CreateBuffer(&bufferDesc, &bufferInitData, &m_pBuffer));
 	}
-	else DX::ThrowIfFailed(m_pDXDevice->CreateBuffer(&bufferDesc, nullptr, &m_pBuffer));
+	else ThrowIfFailed(m_pDXDevice->CreateBuffer(&bufferDesc, nullptr, &m_pBuffer));
 
 	// Create SRV
 	if (bSRV) CreateSRV(uByteWidth);
@@ -307,7 +307,7 @@ void RawBuffer::Create(const bool bVB, const bool bSO, const bool bSRV,
 			0u, uByteWidth / 4u, D3D11_BUFFER_UAV_FLAG_RAW);
 
 		// Create the unordered access view.
-		DX::ThrowIfFailed(m_pDXDevice->CreateUnorderedAccessView(pBuffer, &uavDesc, &m_pUAV));
+		ThrowIfFailed(m_pDXDevice->CreateUnorderedAccessView(pBuffer, &uavDesc, &m_pUAV));
 	}
 }
 
@@ -356,9 +356,9 @@ void StructuredBuffer::Create(const bool bUAV, const bool bDyn,
 	if (pInitialData)
 	{
 		const auto bufferInitData = D3D11_SUBRESOURCE_DATA{ pInitialData, 0u, 0u };
-		DX::ThrowIfFailed(m_pDXDevice->CreateBuffer(&bufferDesc, &bufferInitData, &m_pBuffer));
+		ThrowIfFailed(m_pDXDevice->CreateBuffer(&bufferDesc, &bufferInitData, &m_pBuffer));
 	}
-	else DX::ThrowIfFailed(m_pDXDevice->CreateBuffer(&bufferDesc, nullptr, &m_pBuffer));
+	else ThrowIfFailed(m_pDXDevice->CreateBuffer(&bufferDesc, nullptr, &m_pBuffer));
 
 	// Create SRV
 	CreateSRV(uNumElement);
@@ -372,7 +372,7 @@ void StructuredBuffer::Create(const bool bUAV, const bool bDyn,
 		const auto uavDesc = CD3D11_UNORDERED_ACCESS_VIEW_DESC(pBuffer, DXGI_FORMAT_UNKNOWN, 0u, uNumElement);
 
 		// Create the unordered access view.
-		DX::ThrowIfFailed(m_pDXDevice->CreateUnorderedAccessView(pBuffer, &uavDesc, &m_pUAV));
+		ThrowIfFailed(m_pDXDevice->CreateUnorderedAccessView(pBuffer, &uavDesc, &m_pUAV));
 	}
 }
 
@@ -411,9 +411,9 @@ void Texture3D::Create(const bool bUAV, const bool bDyn,
 	{
 		const auto bufferInitData = D3D11_SUBRESOURCE_DATA
 		{ pInitialData, uStride * uWidth, uStride * uWidth * uHeight };
-		DX::ThrowIfFailed(m_pDXDevice->CreateTexture3D(&textureDesc, &bufferInitData, &m_pTexture));
+		ThrowIfFailed(m_pDXDevice->CreateTexture3D(&textureDesc, &bufferInitData, &m_pTexture));
 	}
-	else DX::ThrowIfFailed(m_pDXDevice->CreateTexture3D(&textureDesc, nullptr, &m_pTexture));
+	else ThrowIfFailed(m_pDXDevice->CreateTexture3D(&textureDesc, nullptr, &m_pTexture));
 	
 	// Create SRV
 	const auto pTexture = m_pTexture.Get();
@@ -434,7 +434,7 @@ void Texture3D::Create(const bool bUAV, const bool bDyn,
 		// Create the unordered access view.
 		VEC_ALLOC(m_vpUAVs, uMips);
 		for (auto &pUAV : m_vpUAVs)
-			DX::ThrowIfFailed(m_pDXDevice->CreateUnorderedAccessView(pTexture, &uavDesc, &pUAV));
+			ThrowIfFailed(m_pDXDevice->CreateUnorderedAccessView(pTexture, &uavDesc, &pUAV));
 	}
 }
 

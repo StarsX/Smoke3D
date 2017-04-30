@@ -97,6 +97,10 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalLibraryDirectories>$(DXUT_DIR)Optional\Bin\Desktop_2017_Win10\Win32\Debug;$(DXUT_DIR)Core\Bin\Desktop_2017_Win10\Win32\Debug</AdditionalLibraryDirectories>
     </Link>
+    <PostBuildEvent>
+      <Command>COPY /Y $(OutDir)*.cso $(ProjectDir)..\Bin\*.cso
+COPY /Y $(OutDir)*.exe $(ProjectDir)..\Bin\*.exe</Command>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
@@ -114,6 +118,10 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalLibraryDirectories>$(DXUT_DIR)Optional\Bin\Desktop_2017_Win10\x64\Debug;$(DXUT_DIR)Core\Bin\Desktop_2017_Win10\x64\Debug</AdditionalLibraryDirectories>
     </Link>
+    <PostBuildEvent>
+      <Command>COPY /Y $(OutDir)*.cso $(ProjectDir)..\Bin\*.cso
+COPY /Y $(OutDir)*.exe $(ProjectDir)..\Bin\*.exe</Command>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
@@ -135,6 +143,10 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalLibraryDirectories>$(DXUT_DIR)Optional\Bin\Desktop_2017_Win10\Win32\Release;$(DXUT_DIR)Core\Bin\Desktop_2017_Win10\Win32\Release</AdditionalLibraryDirectories>
     </Link>
+    <PostBuildEvent>
+      <Command>COPY /Y $(OutDir)*.cso $(ProjectDir)..\Bin\*.cso
+COPY /Y $(OutDir)*.exe $(ProjectDir)..\Bin\*.exe</Command>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
@@ -156,6 +168,10 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalLibraryDirectories>$(DXUT_DIR)Optional\Bin\Desktop_2017_Win10\x64\Release;$(DXUT_DIR)Core\Bin\Desktop_2017_Win10\x64\Release</AdditionalLibraryDirectories>
     </Link>
+    <PostBuildEvent>
+      <Command>COPY /Y $(OutDir)*.cso $(ProjectDir)..\Bin\*.cso
+COPY /Y $(OutDir)*.exe $(ProjectDir)..\Bin\*.exe</Command>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
     <Text Include="ReadMe.txt" />
