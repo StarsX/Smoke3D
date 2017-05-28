@@ -20,7 +20,7 @@ namespace XSDX
 		DirectX::XMMATRIX	m_mWorld;
 		DirectX::XMMATRIX	m_mNormal;
 		DirectX::XMMATRIX	m_mShadow;
-#ifdef	TEMPORAL
+#if	TEMPORAL
 		DirectX::XMMATRIX	m_mWVPPrev;
 #endif
 	};
@@ -47,7 +47,7 @@ namespace XSDX
 		DirectX::XMFLOAT4X4	m_mViewProj;
 		DirectX::XMFLOAT4X4	m_mView;
 		DirectX::XMFLOAT4	m_vLightPtETime;
-#ifdef	TEMPORAL_AA
+#if	TEMPORAL_AA
 		DirectX::XMFLOAT4	m_vProjBias[2];
 #endif
 	};

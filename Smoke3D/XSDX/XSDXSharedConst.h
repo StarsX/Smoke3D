@@ -3,11 +3,11 @@
 //--------------------------------------------------------------------------------------
 
 #ifndef	TEMPORAL_AA
-#define TEMPORAL_AA
+#define TEMPORAL_AA	1
 #endif
 
-#ifdef TEMPORAL_AA
-#define TEMPORAL
+#ifndef	TEMPORAL
+#define TEMPORAL	TEMPORAL_AA
 #endif
 
 #ifndef NUM_CASCADE
