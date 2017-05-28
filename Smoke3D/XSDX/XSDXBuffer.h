@@ -63,7 +63,7 @@ namespace XSDX
 		void Create(const uint32_t uWidth, const uint32_t uHeight, const DXGI_FORMAT format,
 			const uint8_t uSamples = 1ui8, const uint8_t uMips = 1ui8);
 		void Populate(const CPDXShaderResourceView &pSRVSrc, const spShader &pShader,
-			const uint8_t uSRSlot = 0ui8);
+			const uint8_t uSRVSlot = 0ui8);
 
 		const CPDXRenderTargetView		&GetRTV() const;
 	protected:
@@ -105,7 +105,8 @@ namespace XSDX
 		RawBuffer(const CPDXDevice &pDXDevice);
 		void Create(const bool bVB, const bool bSO, const bool bSRV,
 			const bool bUAV, const bool bDyn, const uint32_t uByteWidth,
-			const lpcvoid pInitialData = nullptr);
+			const lpcvoid pInitialData = nullptr,
+			const uint8_t uUAVFlags = D3D11_BUFFER_UAV_FLAG_RAW);
 		void CreateSRV(const uint32_t uByteWidth);
 
 		const CPDXBuffer				&GetBuffer() const;
@@ -128,7 +129,8 @@ namespace XSDX
 		StructuredBuffer(const CPDXDevice &pDXDevice);
 		void Create(const bool bUAV, const bool bDyn,
 			const uint32_t uNumElement, const uint32_t uStride,
-			const lpcvoid pInitialData = nullptr);
+			const lpcvoid pInitialData = nullptr,
+			const uint8_t uUAVFlags = 0ui8);
 		void CreateSRV(const uint32_t uNumElement);
 	};
 

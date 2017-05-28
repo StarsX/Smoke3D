@@ -130,7 +130,7 @@ void RenderTarget::Create(const uint32_t uWidth, const uint32_t uHeight,
 	}
 }
 
-void RenderTarget::Populate(const CPDXShaderResourceView &pSRVSrc, const spShader &pShader, const uint8_t uSRSlot)
+void RenderTarget::Populate(const CPDXShaderResourceView &pSRVSrc, const spShader &pShader, const uint8_t uSRVSlot)
 {
 	auto pDXContext = CPDXContext();
 	m_pDXDevice->GetImmediateContext(&pDXContext);
@@ -149,7 +149,7 @@ void RenderTarget::Populate(const CPDXShaderResourceView &pSRVSrc, const spShade
 	pDXContext->RSGetViewports(&uNumVp, &VpBack);
 	pDXContext->RSSetViewports(uNumVp, &VpDepth);
 
-	pDXContext->PSSetShaderResources(uSRSlot, 1u, pSRVSrc.GetAddressOf());
+	pDXContext->PSSetShaderResources(uSRVSlot, 1u, pSRVSrc.GetAddressOf());
 	pDXContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP);
 
 	pDXContext->VSSetShader(pShader->GetVertexShader(g_uVSScreenQuad).Get(), nullptr, 0u);
@@ -160,7 +160,7 @@ void RenderTarget::Populate(const CPDXShaderResourceView &pSRVSrc, const spShade
 	pDXContext->Draw(3u, 0u);
 
 	const auto pNullSRV = LPDXShaderResourceView(nullptr);
-	pDXContext->PSSetShaderResources(uSRSlot, 1u, &pNullSRV);
+	pDXContext->PSSetShaderResources(uSRVSlot, 1u, &pNullSRV);
 	pDXContext->VSSetShader(nullptr, nullptr, 0u);
 	pDXContext->PSSetShader(nullptr, nullptr, 0u);
 
@@ -273,7 +273,7 @@ RawBuffer::RawBuffer(const CPDXDevice & pDXDevice) :
 
 void RawBuffer::Create(const bool bVB, const bool bSO, const bool bSRV,
 	const bool bUAV, const bool bDyn, const uint32_t uByteWidth,
-	const lpcvoid pInitialData)
+	const lpcvoid pInitialData, const uint8_t uUAVFlags)
 {
 	// Create RB
 	auto uBindFlag = bVB ? D3D11_BIND_VERTEX_BUFFER : 0u;
@@ -303,8 +303,8 @@ void RawBuffer::Create(const bool bVB, const bool bSO, const bool bSRV,
 		const auto pBuffer = m_pBuffer.Get();
 
 		// Setup the description of the unordered access view.
-		const auto uavDesc = CD3D11_UNORDERED_ACCESS_VIEW_DESC(pBuffer, DXGI_FORMAT_R32_TYPELESS,
-			0u, uByteWidth / 4u, D3D11_BUFFER_UAV_FLAG_RAW);
+		const auto uavDesc = CD3D11_UNORDERED_ACCESS_VIEW_DESC(pBuffer,
+			DXGI_FORMAT_R32_TYPELESS, 0u, uByteWidth / 4u, uUAVFlags);
 
 		// Create the unordered access view.
 		ThrowIfFailed(m_pDXDevice->CreateUnorderedAccessView(pBuffer, &uavDesc, &m_pUAV));
@@ -344,7 +344,8 @@ StructuredBuffer::StructuredBuffer(const CPDXDevice &pDXDevice) :
 }
 
 void StructuredBuffer::Create(const bool bUAV, const bool bDyn,
-	const uint32_t uNumElement, const uint32_t uStride, const lpcvoid pInitialData)
+	const uint32_t uNumElement, const uint32_t uStride,
+	const lpcvoid pInitialData, const uint8_t uUAVFlags)
 {
 	// Create SB
 	const auto bufferDesc = CD3D11_BUFFER_DESC(uNumElement * uStride,
@@ -369,7 +370,8 @@ void StructuredBuffer::Create(const bool bUAV, const bool bDyn,
 		const auto pBuffer = m_pBuffer.Get();
 
 		// Setup the description of the unordered access view.
-		const auto uavDesc = CD3D11_UNORDERED_ACCESS_VIEW_DESC(pBuffer, DXGI_FORMAT_UNKNOWN, 0u, uNumElement);
+		const auto uavDesc = CD3D11_UNORDERED_ACCESS_VIEW_DESC(pBuffer,
+			DXGI_FORMAT_UNKNOWN, 0u, uNumElement, uUAVFlags);
 
 		// Create the unordered access view.
 		ThrowIfFailed(m_pDXDevice->CreateUnorderedAccessView(pBuffer, &uavDesc, &m_pUAV));
@@ -389,7 +391,7 @@ void StructuredBuffer::CreateSRV(const uint32_t uNumElement)
 }
 
 //--------------------------------------------------------------------------------------
-// 2D Texture
+// 3D Texture
 //--------------------------------------------------------------------------------------
 
 Texture3D::Texture3D(const CPDXDevice &pDXDevice) :

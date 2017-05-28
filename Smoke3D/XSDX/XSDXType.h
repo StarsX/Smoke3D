@@ -11,58 +11,59 @@
 #define VEC_ALLOC(v, i)			{ v.resize(i); v.shrink_to_fit(); }
 #define VEC_ALLOC_PTR(p, T, i)	{ p = make_shared<T>(); p->resize(i); p->shrink_to_fit(); }
 
-// Dereference
-#define DREF(p)					(*p)
-
 namespace XSDX
 {
-	template<typename T>
-	inline T& dref(std::unique_ptr<T> &p)
-	{
-		assert(p);
-		return DREF(p);
-	}
-
-	template<typename T>
-	inline T& dref(std::shared_ptr<T> &p)
-	{
-		assert(p);
-		return DREF(p);
-	}
-
+	//--------------------------------------------------------------------------------------
+	// Dereference
+	//--------------------------------------------------------------------------------------
+	
 	template<typename T, size_t S>
 	inline T& dref(std::_Array_iterator<T, S> &p)
 	{
 		assert(p._Ptr);
-		return DREF(p);
+		return p[0];
 	}
 
 	template<typename T, size_t S>
 	inline const T dref(std::_Array_const_iterator<T, S> &p)
 	{
 		assert(p._Ptr);
-		return DREF(p);
+		return p[0];
 	}
 
 	template<typename T>
 	inline T& dref(std::_Vector_iterator<T> &p)
 	{
 		assert(p._Ptr);
-		return DREF(p);
+		return p[0];
 	}
 
 	template<typename T>
 	inline const T dref(std::_Vector_const_iterator<T> &p)
 	{
 		assert(p._Ptr);
-		return DREF(p);
+		return p[0];
 	}
 
 	template<typename T, typename = std::enable_if_t<std::is_pointer<T>::value>>
 	inline typename std::remove_pointer_t<T>& dref(T p)
 	{
 		assert(p);
-		return DREF(p);
+		return p[0];
+	}
+
+	template<typename T>
+	inline T& dref(std::unique_ptr<T> &p)
+	{
+		assert(p);
+		return dref(p.get());
+	}
+
+	template<typename T>
+	inline T& dref(std::shared_ptr<T> &p)
+	{
+		assert(p);
+		return dref(p.get());
 	}
 
 	//--------------------------------------------------------------------------------------
