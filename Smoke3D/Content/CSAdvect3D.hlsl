@@ -7,11 +7,7 @@
 //--------------------------------------------------------------------------------------
 // Constants
 //--------------------------------------------------------------------------------------
-#ifdef _MACCORMACK_
-static const float g_fDecay = 1.0;
-#else
-static const float g_fDecay = 0.996;
-#endif
+static const float2 g_vDecay = { 0.996, 1.0 };
 
 //--------------------------------------------------------------------------------------
 // Textures
@@ -40,5 +36,5 @@ void main(uint3 DTid : SV_DispatchThreadID)
 
 	// Update velocity and density
 	g_rwPhiVel[DTid] = g_roPhiVel.SampleLevel(g_smpLinear, vTex, 0);
-	g_rwPhiDen[DTid] = g_roPhiDen.SampleLevel(g_smpLinear, vTex, 0) * g_fDecay;
+	g_rwPhiDen[DTid] = g_roPhiDen.SampleLevel(g_smpLinear, vTex, 0) * g_vDecay[g_fMacCormack];
 }

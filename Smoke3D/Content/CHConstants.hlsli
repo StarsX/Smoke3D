@@ -10,6 +10,7 @@
 cbuffer cbImmutable	: register (b0)
 {
 	float3	g_vTexel;
+	float	g_fMacCormack;
 };
 
 cbuffer cbPerFrame	: register (b1)

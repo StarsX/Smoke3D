@@ -33,7 +33,7 @@ Fluid3D::Fluid3D(const CPDXDevice &pDXDevice, const spShader &pShader, const spS
 	m_pDXDevice->GetImmediateContext(&m_pDXContext);
 }
 
-void Fluid3D::Init(uint32_t uWidth, uint32_t uHeight, uint32_t uDepth)
+void Fluid3D::Init(const uint32_t uWidth, const uint32_t uHeight, const uint32_t uDepth)
 {
 	const auto fWidth = static_cast<float>(uWidth);
 	const auto fHeight = static_cast<float>(uHeight);
@@ -47,10 +47,9 @@ void Fluid3D::Init(uint32_t uWidth, uint32_t uHeight, uint32_t uDepth)
 	m_pSrcDensity->Create(true, false, uWidth, uHeight, uDepth, DXGI_FORMAT_R16_FLOAT);
 	m_pDstDensity->Create(true, false, uWidth, uHeight, uDepth, DXGI_FORMAT_R16_FLOAT);
 
-#ifdef _MACCORMACK_
+	// For macCormack advection
 	m_pTmpDensity = make_unique<Texture3D>(m_pDXDevice);
 	m_pTmpDensity->Create(true, false, uWidth, uHeight, uDepth, DXGI_FORMAT_R16_FLOAT);
-#endif
 
 	m_pDiffuse->Init(uWidth, uHeight, uDepth, sizeof(uint16_t[4]), DXGI_FORMAT_R16G16B16A16_FLOAT);
 	m_pPressure->Init(uWidth, uHeight, uDepth, sizeof(float), DXGI_FORMAT_R32_FLOAT);
@@ -60,15 +59,16 @@ void Fluid3D::Init(uint32_t uWidth, uint32_t uHeight, uint32_t uDepth)
 	m_vThreadGroupSize = XMUINT3(uWidth / THREAD_BLOCK_X, uHeight / THREAD_BLOCK_Y, uDepth / THREAD_BLOCK_Z);
 }
 
-void Fluid3D::Simulate(const float fDeltaTime, const DirectX::XMFLOAT4 vForceDens, const DirectX::XMFLOAT3 vImLoc, const uint8_t uItVisc)
+void Fluid3D::Simulate(const float fDeltaTime, const DirectX::XMFLOAT4 vForceDens,
+	const DirectX::XMFLOAT3 vImLoc, const uint8_t uItVisc, const bool bMacCormack)
 {
 	m_vPerFrames[0] = vForceDens;
 	m_vPerFrames[1] = XMFLOAT4(vImLoc.x, vImLoc.y, vImLoc.z, fDeltaTime);
-	const auto pCBs = array<LPDXBuffer, 2>{ { m_pCBImmutable.Get(), m_pCBPerFrame.Get() } };
+	const auto pCBs = array<LPDXBuffer, 2>{ { m_pCBImmutables[bMacCormack].Get(), m_pCBPerFrame.Get() } };
 	m_pDXContext->UpdateSubresource(m_pCBPerFrame.Get(), 0u, nullptr, m_vPerFrames, 0u, 0u);
 	m_pDXContext->CSSetConstantBuffers(m_uCBImmutable, 2u, pCBs.data());
 
-	advect(fDeltaTime);
+	advect(fDeltaTime, bMacCormack);
 	diffuse(uItVisc);
 	impulse();
 	project();
@@ -104,27 +104,31 @@ void Fluid3D::createConstBuffers()
 	auto desc = CD3D11_BUFFER_DESC(sizeof(XMFLOAT4[2]), D3D11_BIND_CONSTANT_BUFFER);
 	ThrowIfFailed(m_pDXDevice->CreateBuffer(&desc, nullptr, &m_pCBPerFrame));
 
-	const auto cbImmutable = XMFLOAT3A(1.0f / m_vSimSize.x, 1.0f / m_vSimSize.y, 1.0f / m_vSimSize.z);
-	desc.ByteWidth = sizeof(XMFLOAT3A);
+	auto cbImmutable = XMFLOAT4(1.0f / m_vSimSize.x, 1.0f / m_vSimSize.y, 1.0f / m_vSimSize.z, 0.0f);
+	desc.ByteWidth = sizeof(XMFLOAT4);
 	desc.Usage = D3D11_USAGE_IMMUTABLE;
 	const auto dsd = D3D11_SUBRESOURCE_DATA{ &cbImmutable };
-	ThrowIfFailed(m_pDXDevice->CreateBuffer(&desc, &dsd, &m_pCBImmutable));
+	ThrowIfFailed(m_pDXDevice->CreateBuffer(&desc, &dsd, &m_pCBImmutables[0]));
+
+	cbImmutable.w = 1.0f;
+	ThrowIfFailed(m_pDXDevice->CreateBuffer(&desc, &dsd, &m_pCBImmutables[1]));
 }
 
-void Fluid3D::advect(const float fDeltaTime)
+void Fluid3D::advect(const float fDeltaTime, const bool bMacCormack)
 {
 	auto pSrcVelocity = m_pSrcVelocity->GetSRV();
 	advect(fDeltaTime, pSrcVelocity);
 	
-#ifdef _MACCORMACK_
-	m_pDiffuse->SwapTextures(true);
-	m_pDstVelocity = m_pDiffuse->GetDst();
-	pSrcVelocity = m_pDiffuse->GetTmp()->GetSRV();
-	m_pTmpDensity.swap(m_pDstDensity);
-	advect(-fDeltaTime, pSrcVelocity);
+	if (bMacCormack)
+	{
+		m_pDiffuse->SwapTextures(true);
+		m_pDstVelocity = m_pDiffuse->GetDst();
+		pSrcVelocity = m_pDiffuse->GetTmp()->GetSRV();
+		m_pTmpDensity.swap(m_pDstDensity);
+		advect(-fDeltaTime, pSrcVelocity);
 
-	macCormack(fDeltaTime, pSrcVelocity);
-#endif
+		macCormack(fDeltaTime, pSrcVelocity);
+	}
 }
 
 void Fluid3D::advect(const float fDeltaTime, const CPDXShaderResourceView& pSRVVelocity)

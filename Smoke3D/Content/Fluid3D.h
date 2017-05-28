@@ -17,20 +17,22 @@ public:
 	void Simulate(
 		const float fDeltaTime,
 		const XSDX::CPDXShaderResourceView &pSRVImpulse,
-		const uint8_t uItVisc = VISC_ITERATION
+		const uint8_t uItVisc = VISC_ITERATION,
+		const bool bMacCormack = true
 		);
 	void Simulate(
 		const float fDeltaTime,
 		const DirectX::XMFLOAT4 vForceDens = DirectX::XMFLOAT4(0.0f, 0.0f, 0.0f, 0.0f),
 		const DirectX::XMFLOAT3 vImLoc = DirectX::XMFLOAT3(0, 0, 0),
-		const uint8_t uItVisc = VISC_ITERATION
+		const uint8_t uItVisc = VISC_ITERATION,
+		const bool bMacCormack = true
 		);
 	void Render(const XSDX::CPDXUnorderedAccessView &pUAVDst, const XSDX::CPDXShaderResourceView &pSRVDepth);
 	void Render(const XSDX::CPDXUnorderedAccessView &pUAVDst);
 
 protected:
 	void createConstBuffers();
-	void advect(const float fDeltaTime);
+	void advect(const float fDeltaTime, const bool bMacCormack);
 	void advect(const float fDeltaTime, const XSDX::CPDXShaderResourceView &pSRVVelocity);
 	void macCormack(const float fDeltaTime, const XSDX::CPDXShaderResourceView &pSRVVelocity);
 	void diffuse(const uint8_t uIteration);
@@ -61,7 +63,7 @@ protected:
 	XSDX::spShader		m_pShader;
 	XSDX::spState		m_pState;
 
-	XSDX::CPDXBuffer	m_pCBImmutable;
+	XSDX::CPDXBuffer	m_pCBImmutables[2];
 	XSDX::CPDXBuffer	m_pCBPerFrame;
 
 	XSDX::CPDXDevice	m_pDXDevice;

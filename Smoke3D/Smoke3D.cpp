@@ -24,6 +24,7 @@ CModelViewerCamera				g_Camera;					// A model viewing camera
 CDXUTDialog						g_SampleUI;					// dialog for sample specific controls
 bool							g_bShowHelp = false;		// If true, it renders the UI control text
 bool							g_bShowFPS = false;			// If true, it shows the FPS
+bool							g_bMacCormack = true;		// If true, it uses MacCormack advection
 bool							g_bViscous = false;
 bool							g_bLoadingComplete = false;
 
@@ -298,6 +299,8 @@ void CALLBACK OnKeyboard(UINT nChar, bool bKeyDown, bool bAltDown, void* pUserCo
 			g_bShowHelp = !g_bShowHelp; break;
 		case VK_F2:
 			g_bShowFPS = !g_bShowFPS; break;
+		case 'A':
+			g_bMacCormack = !g_bMacCormack; break;
 		case 'V':
 			g_bViscous = !g_bViscous; break;
 		case 'J':
@@ -496,7 +499,8 @@ void CALLBACK OnD3D11FrameRender(ID3D11Device* pd3dDevice, ID3D11DeviceContext* 
 	pd3dImmediateContext->UpdateSubresource(g_pCBPerObject.Get(), 0u, nullptr, &cbPerObject, 0u, 0u);
 
 	// Simulate
-	g_pFluid->Simulate(max(fElapsedTime, DELTA_TIME), g_vForceDens, g_vImLoc, g_bViscous ? 10ui8 : 0ui8);
+	g_pFluid->Simulate(max(fElapsedTime, DELTA_TIME), g_vForceDens, g_vImLoc,
+		g_bViscous ? 10ui8 : 0ui8, g_bMacCormack);
 
 	pd3dImmediateContext->CSSetConstantBuffers(0u, 1u, g_pCBImmutable.GetAddressOf());
 	pd3dImmediateContext->CSSetConstantBuffers(2u, 1u, g_pCBPerObject.GetAddressOf());
