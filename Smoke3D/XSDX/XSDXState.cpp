@@ -37,8 +37,7 @@ void State::CreateDepthStencilState(CPDXDepthStencilState &pState, const bool bE
 		bEnable, bWriteEnable ? D3D11_DEPTH_WRITE_MASK_ALL : D3D11_DEPTH_WRITE_MASK_ZERO, eDepthFunc,
 		false, D3D11_DEFAULT_STENCIL_READ_MASK, D3D11_DEFAULT_STENCIL_WRITE_MASK,
 		D3D11_STENCIL_OP_KEEP, D3D11_STENCIL_OP_KEEP, D3D11_STENCIL_OP_KEEP, D3D11_COMPARISON_ALWAYS,
-		D3D11_STENCIL_OP_KEEP, D3D11_STENCIL_OP_KEEP, D3D11_STENCIL_OP_KEEP, D3D11_COMPARISON_ALWAYS
-		);
+		D3D11_STENCIL_OP_KEEP, D3D11_STENCIL_OP_KEEP, D3D11_STENCIL_OP_KEEP, D3D11_COMPARISON_ALWAYS);
 
 	ThrowIfFailed(m_pDXDevice->CreateDepthStencilState(&desc, &pState));
 }
@@ -333,13 +332,8 @@ const CPDXSamplerState &State::PointBorder()
 const CPDXSamplerState &State::PointComparison()
 {
 	if (!m_pPointComparison)
-		CreateSamplerState(
-			m_pPointComparison,
-			D3D11_FILTER_COMPARISON_MIN_MAG_MIP_POINT,
-			D3D11_TEXTURE_ADDRESS_BORDER,
-			D3D11_COMPARISON_LESS_EQUAL,
-			1.0f
-			);
+		CreateSamplerState(m_pPointComparison, D3D11_FILTER_COMPARISON_MIN_MAG_MIP_POINT,
+			D3D11_TEXTURE_ADDRESS_BORDER, D3D11_COMPARISON_LESS_EQUAL, 1.0f);
 
 	return m_pPointComparison;
 }
@@ -371,13 +365,8 @@ const CPDXSamplerState &State::LinearBorder()
 const CPDXSamplerState &State::LinearComparison()
 {
 	if (!m_pLinearComparison)
-		CreateSamplerState(
-			m_pLinearComparison,
-			D3D11_FILTER_COMPARISON_MIN_MAG_MIP_LINEAR,
-			D3D11_TEXTURE_ADDRESS_BORDER,
-			D3D11_COMPARISON_LESS_EQUAL,
-			1.0f
-		);
+		CreateSamplerState(m_pLinearComparison, D3D11_FILTER_COMPARISON_MIN_MAG_MIP_LINEAR,
+			D3D11_TEXTURE_ADDRESS_BORDER, D3D11_COMPARISON_LESS_EQUAL, 1.0f);
 
 	return m_pLinearComparison;
 }
@@ -409,13 +398,8 @@ const CPDXSamplerState &State::AnisotropicBorder()
 const CPDXSamplerState &State::AnisotropicComparison()
 {
 	if (!m_pAnisotropicComparison)
-		CreateSamplerState(
-			m_pAnisotropicComparison,
-			D3D11_FILTER_COMPARISON_ANISOTROPIC,
-			D3D11_TEXTURE_ADDRESS_BORDER,
-			D3D11_COMPARISON_LESS_EQUAL,
-			1.0f
-			);
+		CreateSamplerState(m_pAnisotropicComparison, D3D11_FILTER_COMPARISON_ANISOTROPIC,
+			D3D11_TEXTURE_ADDRESS_BORDER, D3D11_COMPARISON_LESS_EQUAL, 1.0f);
 
 	return m_pAnisotropicComparison;
 }

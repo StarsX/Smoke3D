@@ -95,11 +95,11 @@
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>$(DXUT_DIR)Optional\Bin\Desktop_2017_Win10\Win32\Debug;$(DXUT_DIR)Core\Bin\Desktop_2017_Win10\Win32\Debug</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(DXUT_DIR)Optional\Bin\Win32\Debug;$(DXUT_DIR)Core\Bin\Win32\Debug</AdditionalLibraryDirectories>
     </Link>
     <PostBuildEvent>
-      <Command>COPY /Y $(OutDir)*.cso $(ProjectDir)..\Bin\*.cso
-COPY /Y $(OutDir)*.exe $(ProjectDir)..\Bin\*.exe</Command>
+      <Command>COPY /Y "$(OutDir)*.cso" "$(SolutionDir)Bin"
+COPY /Y "$(OutDir)*.exe" "$(SolutionDir)Bin"</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -116,11 +116,11 @@ COPY /Y $(OutDir)*.exe $(ProjectDir)..\Bin\*.exe</Command>
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>$(DXUT_DIR)Optional\Bin\Desktop_2017_Win10\x64\Debug;$(DXUT_DIR)Core\Bin\Desktop_2017_Win10\x64\Debug</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(DXUT_DIR)Optional\Bin\x64\Debug;$(DXUT_DIR)Core\Bin\x64\Debug</AdditionalLibraryDirectories>
     </Link>
     <PostBuildEvent>
-      <Command>COPY /Y $(OutDir)*.cso $(ProjectDir)..\Bin\*.cso
-COPY /Y $(OutDir)*.exe $(ProjectDir)..\Bin\*.exe</Command>
+      <Command>COPY /Y "$(OutDir)*.cso" "$(SolutionDir)Bin"
+COPY /Y "$(OutDir)*.exe" "$(SolutionDir)Bin"</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -141,11 +141,11 @@ COPY /Y $(OutDir)*.exe $(ProjectDir)..\Bin\*.exe</Command>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>$(DXUT_DIR)Optional\Bin\Desktop_2017_Win10\Win32\Release;$(DXUT_DIR)Core\Bin\Desktop_2017_Win10\Win32\Release</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(DXUT_DIR)Optional\Bin\Win32\Release;$(DXUT_DIR)Core\Bin\Win32\Release</AdditionalLibraryDirectories>
     </Link>
     <PostBuildEvent>
-      <Command>COPY /Y $(OutDir)*.cso $(ProjectDir)..\Bin\*.cso
-COPY /Y $(OutDir)*.exe $(ProjectDir)..\Bin\*.exe</Command>
+      <Command>COPY /Y "$(OutDir)*.cso" "$(SolutionDir)Bin"
+COPY /Y "$(OutDir)*.exe" "$(SolutionDir)Bin"</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -166,11 +166,11 @@ COPY /Y $(OutDir)*.exe $(ProjectDir)..\Bin\*.exe</Command>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>$(DXUT_DIR)Optional\Bin\Desktop_2017_Win10\x64\Release;$(DXUT_DIR)Core\Bin\Desktop_2017_Win10\x64\Release</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(DXUT_DIR)Optional\Bin\x64\Release;$(DXUT_DIR)Core\Bin\x64\Release</AdditionalLibraryDirectories>
     </Link>
     <PostBuildEvent>
-      <Command>COPY /Y $(OutDir)*.cso $(ProjectDir)..\Bin\*.cso
-COPY /Y $(OutDir)*.exe $(ProjectDir)..\Bin\*.exe</Command>
+      <Command>COPY /Y "$(OutDir)*.cso" "$(SolutionDir)Bin"
+COPY /Y "$(OutDir)*.exe" "$(SolutionDir)Bin"</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>

@@ -46,19 +46,10 @@ TaskVoid Shader::CreateVertexShader(const wstring &szFileName, const uint8_t i)
 	return loadVSTask.then([this, i](const CPDXBlob &pFileData)
 	{
 		m_ppVSBuffers[i] = pFileData;
-		ThrowIfFailed(
-			m_pDXDevice->CreateVertexShader(
-				pFileData->GetBufferPointer(),
-				pFileData->GetBufferSize(),
-				nullptr, &m_ppVertexShaders[i]
-				)
-			);
-		ThrowIfFailed(
-			D3DReflect(
-				pFileData->GetBufferPointer(), pFileData->GetBufferSize(),
-				IID_ID3D11ShaderReflection, &m_ppVSReflectors[i]
-				)
-			);
+		ThrowIfFailed(m_pDXDevice->CreateVertexShader(pFileData->GetBufferPointer(),
+			pFileData->GetBufferSize(), nullptr, &m_ppVertexShaders[i]));
+		ThrowIfFailed(D3DReflect(pFileData->GetBufferPointer(), pFileData->GetBufferSize(),
+			IID_ID3D11ShaderReflection, &m_ppVSReflectors[i]));
 	});
 }
 
@@ -69,19 +60,10 @@ TaskVoid Shader::CreateHullShader(const wstring &szFileName, const uint8_t i)
 	// Create the shader
 	return loadVSTask.then([this, i](const CPDXBlob &pFileData)
 	{
-		ThrowIfFailed(
-			m_pDXDevice->CreateHullShader(
-				pFileData->GetBufferPointer(),
-				pFileData->GetBufferSize(),
-				nullptr, &m_ppHullShaders[i]
-				)
-			);
-		ThrowIfFailed(
-			D3DReflect(
-				pFileData->GetBufferPointer(), pFileData->GetBufferSize(),
-				IID_ID3D11ShaderReflection, &m_ppHSReflectors[i]
-				)
-			);
+		ThrowIfFailed(m_pDXDevice->CreateHullShader(pFileData->GetBufferPointer(),
+			pFileData->GetBufferSize(), nullptr, &m_ppHullShaders[i]));
+		ThrowIfFailed(D3DReflect(pFileData->GetBufferPointer(), pFileData->GetBufferSize(),
+			IID_ID3D11ShaderReflection, &m_ppHSReflectors[i]));
 	});
 }
 
@@ -92,19 +74,10 @@ TaskVoid Shader::CreateDomainShader(const wstring &szFileName, const uint8_t i)
 	// Create the shader
 	return loadVSTask.then([this, i](const CPDXBlob &pFileData)
 	{
-		ThrowIfFailed(
-			m_pDXDevice->CreateDomainShader(
-				pFileData->GetBufferPointer(),
-				pFileData->GetBufferSize(),
-				nullptr, &m_ppDomainShaders[i]
-				)
-			);
-		ThrowIfFailed(
-			D3DReflect(
-				pFileData->GetBufferPointer(), pFileData->GetBufferSize(),
-				IID_ID3D11ShaderReflection, &m_ppDSReflectors[i]
-				)
-			);
+		ThrowIfFailed(m_pDXDevice->CreateDomainShader(pFileData->GetBufferPointer(),
+			pFileData->GetBufferSize(), nullptr, &m_ppDomainShaders[i]));
+		ThrowIfFailed(D3DReflect(pFileData->GetBufferPointer(), pFileData->GetBufferSize(),
+			IID_ID3D11ShaderReflection, &m_ppDSReflectors[i]));
 	});
 }
 
@@ -115,19 +88,10 @@ TaskVoid Shader::CreateGeometryShader(const wstring &szFileName, const uint8_t i
 	// Create the shader
 	return loadGSTask.then([this, i](const CPDXBlob &pFileData)
 	{
-		ThrowIfFailed(
-			m_pDXDevice->CreateGeometryShader(
-				pFileData->GetBufferPointer(),
-				pFileData->GetBufferSize(),
-				nullptr, &m_ppGeometryShaders[i]
-				)
-			);
-		ThrowIfFailed(
-			D3DReflect(
-				pFileData->GetBufferPointer(), pFileData->GetBufferSize(),
-				IID_ID3D11ShaderReflection, &m_ppGSReflectors[i]
-				)
-			);
+		ThrowIfFailed(m_pDXDevice->CreateGeometryShader(pFileData->GetBufferPointer(),
+			pFileData->GetBufferSize(), nullptr, &m_ppGeometryShaders[i]));
+		ThrowIfFailed(D3DReflect(pFileData->GetBufferPointer(), pFileData->GetBufferSize(),
+			IID_ID3D11ShaderReflection, &m_ppGSReflectors[i]));
 	});
 }
 
@@ -142,17 +106,11 @@ TaskVoid Shader::CreateGeometryShaderWithSO(const wstring &szFileName, const uin
 		auto uStride = 0u;
 		for (auto j = 0ui8; j < uNumEntry; ++j)
 			uStride += pDecl[j].ComponentCount * sizeof(float);
-		ThrowIfFailed(
-			m_pDXDevice->CreateGeometryShaderWithStreamOutput(
-				pFileData->GetBufferPointer(), pFileData->GetBufferSize(), pDecl,
-				uNumEntry, &uStride, 1u, 0u, nullptr, &m_ppGeometryShaders[i])
-			);
-		ThrowIfFailed(
-			D3DReflect(
-				pFileData->GetBufferPointer(), pFileData->GetBufferSize(),
-				IID_ID3D11ShaderReflection, &m_ppGSReflectors[i]
-				)
-			);
+		ThrowIfFailed(m_pDXDevice->CreateGeometryShaderWithStreamOutput(
+			pFileData->GetBufferPointer(), pFileData->GetBufferSize(), pDecl,
+			uNumEntry, &uStride, 1u, 0u, nullptr, &m_ppGeometryShaders[i]));
+		ThrowIfFailed(D3DReflect(pFileData->GetBufferPointer(), pFileData->GetBufferSize(),
+			IID_ID3D11ShaderReflection, &m_ppGSReflectors[i]));
 	});
 }
 
@@ -163,19 +121,10 @@ TaskVoid Shader::CreatePixelShader(const wstring &szFileName, const uint8_t i)
 	// Create the shader
 	return loadPSTask.then([this, i](const CPDXBlob &pFileData)
 	{
-		ThrowIfFailed(
-			m_pDXDevice->CreatePixelShader(
-				pFileData->GetBufferPointer(),
-				pFileData->GetBufferSize(),
-				nullptr, &m_ppPixelShaders[i]
-				)
-			);
-		ThrowIfFailed(
-			D3DReflect(
-				pFileData->GetBufferPointer(), pFileData->GetBufferSize(),
-				IID_ID3D11ShaderReflection, &m_ppPSReflectors[i]
-				)
-			);
+		ThrowIfFailed(m_pDXDevice->CreatePixelShader(pFileData->GetBufferPointer(),
+			pFileData->GetBufferSize(), nullptr, &m_ppPixelShaders[i]));
+		ThrowIfFailed(D3DReflect(pFileData->GetBufferPointer(), pFileData->GetBufferSize(),
+			IID_ID3D11ShaderReflection, &m_ppPSReflectors[i]));
 	});
 }
 
@@ -186,19 +135,10 @@ TaskVoid Shader::CreateComputeShader(const wstring &szFileName, const uint8_t i)
 	// Create the shader
 	return loadCSTask.then([this, i](const CPDXBlob &pFileData)
 	{
-		ThrowIfFailed(
-			m_pDXDevice->CreateComputeShader(
-				pFileData->GetBufferPointer(),
-				pFileData->GetBufferSize(),
-				nullptr, &m_ppComputeShaders[i]
-				)
-			);
-		ThrowIfFailed(
-			D3DReflect(
-				pFileData->GetBufferPointer(), pFileData->GetBufferSize(),
-				IID_ID3D11ShaderReflection, &m_ppCSReflectors[i]
-				)
-			);
+		ThrowIfFailed(m_pDXDevice->CreateComputeShader(pFileData->GetBufferPointer(),
+			pFileData->GetBufferSize(), nullptr, &m_ppComputeShaders[i]));
+		ThrowIfFailed(D3DReflect(pFileData->GetBufferPointer(), pFileData->GetBufferSize(),
+			IID_ID3D11ShaderReflection, &m_ppCSReflectors[i]));
 	});
 }
 
@@ -210,18 +150,11 @@ void Shader::CreateGeometryShaderWithSO(const uint8_t i, const LPCD3D11_SO_DECLA
 	for (auto j = 0ui8; j < uNumEntry; ++j)
 		uStride += pDecl[j].ComponentCount * sizeof(float);
 
-	ThrowIfFailed(
-		m_pDXDevice->CreateGeometryShaderWithStreamOutput(
-			m_ppVSBuffers[i]->GetBufferPointer(), m_ppVSBuffers[i]->GetBufferSize(),
-			pDecl, uNumEntry, &uStride, 1u, 0u, nullptr, &m_ppGeometryShaders[i])
-		);
-
-	ThrowIfFailed(
-		D3DReflect(
-			m_ppVSBuffers[i]->GetBufferPointer(), m_ppVSBuffers[i]->GetBufferSize(),
-			IID_ID3D11ShaderReflection, &m_ppGSReflectors[i]
-			)
-		);
+	ThrowIfFailed(m_pDXDevice->CreateGeometryShaderWithStreamOutput(
+		m_ppVSBuffers[i]->GetBufferPointer(), m_ppVSBuffers[i]->GetBufferSize(),
+		pDecl, uNumEntry, &uStride, 1u, 0u, nullptr, &m_ppGeometryShaders[i]));
+	ThrowIfFailed(D3DReflect(m_ppVSBuffers[i]->GetBufferPointer(), m_ppVSBuffers[i]->GetBufferSize(),
+		IID_ID3D11ShaderReflection, &m_ppGSReflectors[i]));
 }
 
 void Shader::SetVertexShaderBuffer(const uint8_t i, const CPDXBlob &pFileData)

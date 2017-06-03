@@ -38,7 +38,7 @@ namespace XSDX
 		Texture2D(const CPDXDevice &pDXDevice);
 		void Create(const bool bUAV, const bool bDyn,
 			const uint32_t uWidth, const uint32_t uHeight,
-			const DXGI_FORMAT format, const uint8_t uMips = 1ui8,
+			const DXGI_FORMAT eFormat, const uint8_t uMips = 1ui8,
 			const lpcvoid pInitialData = nullptr,
 			const uint8_t uStride = sizeof(float));
 
@@ -60,7 +60,7 @@ namespace XSDX
 	{
 	public:
 		RenderTarget(const CPDXDevice &pDXDevice);
-		void Create(const uint32_t uWidth, const uint32_t uHeight, const DXGI_FORMAT format,
+		void Create(const uint32_t uWidth, const uint32_t uHeight, const DXGI_FORMAT eFormat,
 			const uint8_t uSamples = 1ui8, const uint8_t uMips = 1ui8);
 		void Populate(const CPDXShaderResourceView &pSRVSrc, const spShader &pShader,
 			const uint8_t uSRVSlot = 0ui8);
@@ -82,7 +82,7 @@ namespace XSDX
 	public:
 		DepthStencil(const CPDXDevice &pDXDevice);
 		void Create(const uint32_t uWidth, const uint32_t uHeight, const bool bRead,
-			DXGI_FORMAT format = DXGI_FORMAT_D24_UNORM_S8_UINT,
+			DXGI_FORMAT eFormat = DXGI_FORMAT_D24_UNORM_S8_UINT,
 			const uint8_t uSamples = 1ui8);
 
 		const CPDXDepthStencilView		&GetDSV() const;
@@ -96,6 +96,30 @@ namespace XSDX
 	using spDepthStencil = std::shared_ptr<DepthStencil>;
 	using vuDepthStencil = std::vector<upDepthStencil>;
 	using vpDepthStencil = std::vector<spDepthStencil>;
+
+
+	class Texture3D :
+		public Buffer
+	{
+	public:
+		Texture3D(const CPDXDevice &pDXDevice);
+		void Create(const bool bUAV, const bool bDyn,
+			const uint32_t uWidth, const uint32_t uHeight, const uint32_t uDepth,
+			const DXGI_FORMAT eFormat, const uint8_t uMips = 1ui8,
+			const lpcvoid pInitialData = nullptr,
+			const uint8_t uStride = sizeof(float));
+
+		const CPDXTexture3D				&GetBuffer() const;
+		const CPDXUnorderedAccessView	&GetUAV(const uint8_t i = 0ui8) const;
+	protected:
+		CPDXTexture3D					m_pTexture;
+		vCPDXUAV						m_vpUAVs;
+	};
+
+	using upTexture3D = std::unique_ptr<Texture3D>;
+	using spTexture3D = std::shared_ptr<Texture3D>;
+	using vuTexture3D = std::vector<upTexture3D>;
+	using vpTexture3D = std::vector<spTexture3D>;
 
 
 	class RawBuffer :
@@ -122,6 +146,23 @@ namespace XSDX
 	using vpRawBuffer = std::vector<spRawBuffer>;
 
 
+	class TypedBuffer :
+	public RawBuffer
+	{
+	public:
+		TypedBuffer(const CPDXDevice &pDXDevice);
+		void Create(const bool bUAV, const bool bDyn, const uint32_t uNumElement,
+			const uint32_t uStride, const DXGI_FORMAT eFormat,
+			const lpcvoid pInitialData = nullptr, const uint8_t uUAVFlags = 0ui8);
+		void CreateSRV(const uint32_t uNumElement, const DXGI_FORMAT eFormat);
+	};
+
+	using upTypedBuffer = std::unique_ptr<TypedBuffer>;
+	using spTypedBuffer = std::shared_ptr<TypedBuffer>;
+	using vuTypedBuffer = std::vector<upTypedBuffer>;
+	using vpTypedBuffer = std::vector<spTypedBuffer>;
+
+
 	class StructuredBuffer :
 		public RawBuffer
 	{
@@ -138,28 +179,4 @@ namespace XSDX
 	using spStructuredBuffer = std::shared_ptr<StructuredBuffer>;
 	using vuStructuredBuffer = std::vector<upStructuredBuffer>;
 	using vpStructuredBuffer = std::vector<spStructuredBuffer>;
-
-
-	class Texture3D :
-		public Buffer
-	{
-	public:
-		Texture3D(const CPDXDevice &pDXDevice);
-		void Create(const bool bUAV, const bool bDyn,
-			const uint32_t uWidth, const uint32_t uHeight, const uint32_t uDepth,
-			const DXGI_FORMAT format, const uint8_t uMips = 1ui8,
-			const lpcvoid pInitialData = nullptr,
-			const uint8_t uStride = sizeof(float));
-
-		const CPDXTexture3D				&GetBuffer() const;
-		const CPDXUnorderedAccessView	&GetUAV(const uint8_t i = 0ui8) const;
-	protected:
-		CPDXTexture3D					m_pTexture;
-		vCPDXUAV						m_vpUAVs;
-	};
-
-	using upTexture3D = std::unique_ptr<Texture3D>;
-	using spTexture3D = std::shared_ptr<Texture3D>;
-	using vuTexture3D = std::vector<upTexture3D>;
-	using vpTexture3D = std::vector<spTexture3D>;
 }

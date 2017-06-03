@@ -101,8 +101,9 @@ namespace XSDX
 	{
 		PS_POST_PROC,
 		PS_TONE_MAP,
-		PS_FXAA,
-		PS_TEMPORAL_AA
+		PS_TEMPORAL_AA,
+		PS_UNSHARP,
+		PS_FXAA
 	};
 
 	// Compute shaders
@@ -130,10 +131,11 @@ namespace XSDX
 	static uint8_t			g_uPSDepth		(PS_DEPTH);
 	static uint8_t			g_uPSToneMap	(PS_TONE_MAP);
 	
-	static uint8_t			g_uPSFXAA		(PS_FXAA);
+	static uint8_t			g_uPSTemporalAA	(PS_TEMPORAL_AA);
 	static uint8_t			g_uPSOcclusion	(PS_OCCLUSION);
 	static uint8_t			g_uPSResample	(PS_RESAMPLE);
-	static uint8_t			g_uPSTemporalAA	(PS_TEMPORAL_AA);
+	static uint8_t			g_uPSUnsharp	(PS_UNSHARP);
+	static uint8_t			g_uPSFXAA		(PS_FXAA);
 	static uint8_t			g_uPSReflect	(PS_REFLECT);
 	static uint8_t			g_uPSBound		(PS_BOUND);
 
