@@ -32,14 +32,14 @@ namespace XSDX
 	}
 
 	template<typename T>
-	inline T& dref(std::_Vector_iterator<T> &p)
+	inline T& dref(std::_Vector_iterator<std::_Vector_val<std::_Simple_types<T>>> &p)
 	{
 		assert(p._Ptr);
 		return p[0];
 	}
 
 	template<typename T>
-	inline const T dref(std::_Vector_const_iterator<T> &p)
+	inline const T dref(std::_Vector_const_iterator<std::_Vector_val<std::_Simple_types<T>>> &p)
 	{
 		assert(p._Ptr);
 		return p[0];
@@ -149,7 +149,9 @@ namespace XSDX
 	using pfloat					= std::add_pointer_t<float>;
 	using pbyte						= std::add_pointer_t<byte>;
 	using pint8						= std::add_pointer_t<int8_t>;
+	using pint16					= std::add_pointer_t<int16_t>;
 	using puint8					= std::add_pointer_t<uint8_t>;
+	using puint16					= std::add_pointer_t<uint16_t>;
 	using puint						= std::add_pointer_t<uint32_t>;
 	using lpvoid					= std::add_pointer_t<void>;
 	using lpcvoid					= std::add_pointer_t<const void>;
@@ -200,7 +202,9 @@ namespace XSDX
 	using vfloat					= std::vector<float>;
 	using vbyte						= std::vector<byte>;
 	using vint8						= std::vector<int8_t>;
+	using vint16					= std::vector<int16_t>;
 	using vuint8					= std::vector<uint8_t>;
+	using vuint16					= std::vector<uint16_t>;
 	using vuint						= std::vector<uint32_t>;
 
 	// Vector vectors
@@ -210,7 +214,9 @@ namespace XSDX
 	using vvfloat					= std::vector<vfloat>;
 	using vvbyte					= std::vector<vbyte>;
 	using vvint8					= std::vector<vint8>;
+	using vvint16					= std::vector<vint16>;
 	using vvuint8					= std::vector<vuint8>;
+	using vvuint16					= std::vector<vuint16>;
 	using vvuint					= std::vector<vuint>;
 
 	// Integer vectors
