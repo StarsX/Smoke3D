@@ -23,7 +23,7 @@ public:
 	void Simulate(
 		const float fDeltaTime,
 		const DirectX::XMFLOAT4 vForceDens = DirectX::XMFLOAT4(0.0f, 0.0f, 0.0f, 0.0f),
-		const DirectX::XMFLOAT3 vImLoc = DirectX::XMFLOAT3(0, 0, 0),
+		const DirectX::XMFLOAT3 vImLoc = DirectX::XMFLOAT3(0.0f, 0.0f, 0.0f),
 		const uint8_t uItVisc = VISC_ITERATION,
 		const bool bMacCormack = true
 		);

@@ -2,7 +2,6 @@
 // By Stars XU Tianchen
 //--------------------------------------------------------------------------------------
 
-#include "pch.h"
 #include "XSDXState.h"
 
 using namespace DX;
@@ -10,6 +9,10 @@ using namespace XSDX;
 
 State::State(const CPDXDevice &pDXDevice) :
 	m_pDXDevice(pDXDevice)
+{
+}
+
+State::~State(void)
 {
 }
 
@@ -68,7 +71,7 @@ void State::CreateSamplerState(CPDXSamplerState &pState, const D3D11_FILTER eFil
 	desc.AddressV = eAddressMode;
 	desc.AddressW = eAddressMode;
 
-	desc.MaxAnisotropy = (m_pDXDevice->GetFeatureLevel() > D3D_FEATURE_LEVEL_9_1) ? 16u : 2u;
+	desc.MaxAnisotropy = (m_pDXDevice->GetFeatureLevel() > D3D_FEATURE_LEVEL_9_1) ? 16 : 2;
 
 	desc.MaxLOD = D3D11_FLOAT32_MAX;
 	desc.ComparisonFunc = eCmpFunc;
@@ -113,6 +116,35 @@ const CPDXBlendState &State::NonPremultiplied()
 	return m_pNonPremultiplied;
 }
 
+const CPDXBlendState &State::NonPremultiplied0()
+{
+	if (!m_pNonPremultiplied0)
+	{
+		auto desc = D3D11_BLEND_DESC
+		{
+			false,								// AlphaToCoverageEnable
+			true,								// IndependentBlendEnable
+			// Non-premultiplied alpha blend RTV0 only
+			D3D11_RENDER_TARGET_BLEND_DESC
+			{
+				true,							// BlendEnable
+				D3D11_BLEND_SRC_ALPHA,			// SrcBlend
+				D3D11_BLEND_INV_SRC_ALPHA,		// DestBlend
+				D3D11_BLEND_OP_ADD,				// BlendOp
+				D3D11_BLEND_SRC_ALPHA,			// SrcBlendAlpha
+				D3D11_BLEND_INV_SRC_ALPHA,		// DestBlendAlpha
+				D3D11_BLEND_OP_ADD,				// BlendOpAlpha
+				D3D11_COLOR_WRITE_ENABLE_ALL	// RenderTargetWriteMask
+			}
+		};
+		desc.RenderTarget[1].RenderTargetWriteMask = D3D11_COLOR_WRITE_ENABLE_ALL;
+
+		ThrowIfFailed(m_pDXDevice->CreateBlendState(&desc, &m_pNonPremultiplied0));
+	}
+
+	return m_pNonPremultiplied0;
+}
+
 const CPDXBlendState &State::AlphaToCoverage()
 {
 	if (!m_pAlphaToCoverage)
@@ -133,10 +165,12 @@ const CPDXBlendState &State::AutoAlphaBlend()
 {
 	if (!m_pAutoAlphaBlend)
 	{
-		const auto desc = D3D11_BLEND_DESC {
+		const auto desc = D3D11_BLEND_DESC
+		{
 			false,								// AlphaToCoverageEnable
 			false,								// IndependentBlendEnable
-			D3D11_RENDER_TARGET_BLEND_DESC {
+			D3D11_RENDER_TARGET_BLEND_DESC
+			{
 				true,							// BlendEnable
 				D3D11_BLEND_SRC_ALPHA,			// SrcBlend
 				D3D11_BLEND_INV_SRC_ALPHA,		// DestBlend
@@ -165,11 +199,11 @@ const CPDXBlendState &State::Multiplied()
 			D3D11_RENDER_TARGET_BLEND_DESC
 			{
 				true,							// BlendEnable
-				D3D11_BLEND_DEST_COLOR,			// SrcBlend
-				D3D11_BLEND_ZERO,				// DestBlend
+				D3D11_BLEND_ZERO,				// SrcBlend
+				D3D11_BLEND_SRC_COLOR,			// DestBlend
 				D3D11_BLEND_OP_ADD,				// BlendOp
-				D3D11_BLEND_DEST_ALPHA,			// SrcBlendAlpha
-				D3D11_BLEND_ZERO,				// DestBlendAlpha
+				D3D11_BLEND_ZERO,				// SrcBlendAlpha
+				D3D11_BLEND_SRC_ALPHA,			// DestBlendAlpha
 				D3D11_BLEND_OP_ADD,				// BlendOpAlpha
 				D3D11_COLOR_WRITE_ENABLE_ALL	// RenderTargetWriteMask
 			}
@@ -185,7 +219,8 @@ const CPDXBlendState &State::WeightBlend()
 {
 	if (!m_pWeightBlend)
 	{
-		auto desc = D3D11_BLEND_DESC {
+		auto desc = D3D11_BLEND_DESC
+		{
 			false,								// AlphaToCoverageEnable
 			true,								// IndependentBlendEnable
 			// Accumulation
@@ -204,11 +239,11 @@ const CPDXBlendState &State::WeightBlend()
 			D3D11_RENDER_TARGET_BLEND_DESC
 			{
 				true,							// BlendEnable
-				D3D11_BLEND_DEST_COLOR,			// SrcBlend
-				D3D11_BLEND_ZERO,				// DestBlend
+				D3D11_BLEND_ZERO,				// SrcBlend
+				D3D11_BLEND_SRC_COLOR,			// DestBlend
 				D3D11_BLEND_OP_ADD,				// BlendOp
 				D3D11_BLEND_ZERO,				// SrcBlendAlpha
-				D3D11_BLEND_ZERO,				// DestBlendAlpha
+				D3D11_BLEND_SRC_ALPHA,			// DestBlendAlpha
 				D3D11_BLEND_OP_ADD				// BlendOpAlpha
 			}
 		};
@@ -219,6 +254,60 @@ const CPDXBlendState &State::WeightBlend()
 	}
 
 	return m_pWeightBlend;
+}
+
+const CPDXBlendState &State::SelectMin()
+{
+	if (!m_pSelectMin)
+	{
+		const auto desc = D3D11_BLEND_DESC
+		{
+			false,								// AlphaToCoverageEnable
+			false,								// IndependentBlendEnable
+			D3D11_RENDER_TARGET_BLEND_DESC
+		{
+			true,							// BlendEnable
+			D3D11_BLEND_ONE,				// SrcBlend
+			D3D11_BLEND_ONE,				// DestBlend
+			D3D11_BLEND_OP_MIN,				// BlendOp
+			D3D11_BLEND_ONE,				// SrcBlendAlpha
+			D3D11_BLEND_ONE,				// DestBlendAlpha
+			D3D11_BLEND_OP_MIN,				// BlendOpAlpha
+			D3D11_COLOR_WRITE_ENABLE_ALL	// RenderTargetWriteMask
+		}
+		};
+
+		ThrowIfFailed(m_pDXDevice->CreateBlendState(&desc, &m_pSelectMin));
+	}
+
+	return m_pSelectMin;
+}
+
+const CPDXBlendState &State::SelectMax()
+{
+	if (!m_pSelectMax)
+	{
+		const auto desc = D3D11_BLEND_DESC
+		{
+			false,								// AlphaToCoverageEnable
+			false,								// IndependentBlendEnable
+			D3D11_RENDER_TARGET_BLEND_DESC
+			{
+				true,							// BlendEnable
+				D3D11_BLEND_ONE,				// SrcBlend
+				D3D11_BLEND_ONE,				// DestBlend
+				D3D11_BLEND_OP_MAX,				// BlendOp
+				D3D11_BLEND_ONE,				// SrcBlendAlpha
+				D3D11_BLEND_ONE,				// DestBlendAlpha
+				D3D11_BLEND_OP_MAX,				// BlendOpAlpha
+				D3D11_COLOR_WRITE_ENABLE_ALL	// RenderTargetWriteMask
+			}
+		};
+
+		ThrowIfFailed(m_pDXDevice->CreateBlendState(&desc, &m_pSelectMax));
+	}
+
+	return m_pSelectMax;
 }
 
 //--------------------------------------------------------------------------------------

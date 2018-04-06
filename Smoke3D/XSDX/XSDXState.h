@@ -12,6 +12,7 @@ namespace XSDX
 	{
 	public:
 		State(const CPDXDevice &pDXDevice);
+		virtual ~State(void);
 
 		void CreateBlendState(
 			CPDXBlendState &pState, const bool bAlphaToCov,
@@ -33,11 +34,14 @@ namespace XSDX
 		const CPDXBlendState		&AlphaBlend();
 		const CPDXBlendState		&Additive();
 		const CPDXBlendState		&NonPremultiplied();
+		const CPDXBlendState		&NonPremultiplied0();
 		const CPDXBlendState		&AlphaToCoverage();
 		const CPDXBlendState		&Accumulative();
 		const CPDXBlendState		&AutoAlphaBlend();
 		const CPDXBlendState		&Multiplied();
 		const CPDXBlendState		&WeightBlend();
+		const CPDXBlendState		&SelectMin();
+		const CPDXBlendState		&SelectMax();
 
 		const CPDXDepthStencilState	&DepthNone();
 		const CPDXDepthStencilState	&DepthDefault();
@@ -67,11 +71,14 @@ namespace XSDX
 		CPDXBlendState				m_pAlphaBlend;
 		CPDXBlendState				m_pAdditive;
 		CPDXBlendState				m_pNonPremultiplied;
+		CPDXBlendState				m_pNonPremultiplied0;
 		CPDXBlendState				m_pAlphaToCoverage;
 		CPDXBlendState				m_pAccumulative;
 		CPDXBlendState				m_pAutoAlphaBlend;
 		CPDXBlendState				m_pMultiplied;
 		CPDXBlendState				m_pWeightBlend;
+		CPDXBlendState				m_pSelectMin;
+		CPDXBlendState				m_pSelectMax;
 
 		CPDXDepthStencilState		m_pDepthNone;
 		CPDXDepthStencilState		m_pDepthDefault;

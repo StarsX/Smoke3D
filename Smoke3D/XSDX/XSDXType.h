@@ -190,10 +190,34 @@ namespace XSDX
 	//--------------------------------------------------------------------------------------
 
 	// DirectX types
+	using vCPDXResource				= std::vector<CPDXResource>;
 	using vCPDXBuffer				= std::vector<CPDXBuffer>;
 	using vCPDXTexture2D			= std::vector<CPDXTexture2D>;
+	using vCPDXTexture3D			= std::vector<CPDXTexture3D>;
 	using vCPDXSRV					= std::vector<CPDXShaderResourceView>;
+	using vCPDXRTV					= std::vector<CPDXRenderTargetView>;
+	using vCPDXDSV					= std::vector<CPDXDepthStencilView>;
 	using vCPDXUAV					= std::vector<CPDXUnorderedAccessView>;
+
+	using vCPDXBlendState			= std::vector<CPDXBlendState>;
+	using vCPDXDepthStencilState	= std::vector<CPDXDepthStencilState>;
+	using vCPDXRasterizerState		= std::vector<CPDXRasterizerState>;
+	using vCPDXSamplerState			= std::vector<CPDXSamplerState>;
+
+	// DirectX type pointers
+	using vLPDXResource				= std::vector<LPDXResource>;
+	using vLPDXBuffer				= std::vector<LPDXBuffer>;
+	using vLPDXTexture2D			= std::vector<LPDXTexture2D>;
+	using vLPDXTexture3D			= std::vector<LPDXTexture3D>;
+	using vLPDXSRV					= std::vector<LPDXShaderResourceView>;
+	using vLPDXRTV					= std::vector<LPDXRenderTargetView>;
+	using vLPDXDSV					= std::vector<LPDXDepthStencilView>;
+	using vLPDXUAV					= std::vector<LPDXUnorderedAccessView>;
+
+	using vLPDXBlendState			= std::vector<LPDXBlendState>;
+	using vLPDXDepthStencilState	= std::vector<LPDXDepthStencilState>;
+	using vLPDXRasterizerState		= std::vector<LPDXRasterizerState>;
+	using vLPDXSamplerState			= std::vector<LPDXSamplerState>;
 
 	// Basic types
 	using vbool						= std::vector<bool>;

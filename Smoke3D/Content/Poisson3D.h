@@ -17,9 +17,9 @@ public:
 	void Init(const DirectX::XMUINT3 &vSimSize, const uint8_t uStride, const DXGI_FORMAT format);
 	void Init(const uint32_t uWidth, const uint32_t uHeight, const uint32_t uDepth,
 		const uint8_t uStride, const DXGI_FORMAT format);
-	void SetShaders(const uint8_t uCSIteration, const uint8_t uCSTemporal = 1ui8, const uint8_t uCSDiv = 2ui8);
+	void SetShaders(const uint8_t uCSIteration, const uint8_t uCSTemporal = 1, const uint8_t uCSDiv = 2);
 	void ComputeDivergence(const XSDX::CPDXShaderResourceView &srvSource);
-	void SolvePoisson(const uint8_t uIteration = 1ui8);
+	void SolvePoisson(const uint8_t uIteration = 1);
 	void Advect(const XSDX::CPDXShaderResourceView &srvSource);
 	void SwapTextures(const bool bUnknown = false);
 

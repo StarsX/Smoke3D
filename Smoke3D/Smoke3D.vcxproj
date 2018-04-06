@@ -22,7 +22,7 @@
     <ProjectGuid>{A02FA12D-42E8-487A-9FC0-1B1326E01A3A}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
     <RootNamespace>Smoke3D</RootNamespace>
-    <WindowsTargetPlatformVersion>10.0.15063.0</WindowsTargetPlatformVersion>
+    <WindowsTargetPlatformVersion>10.0.16299.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
@@ -89,7 +89,6 @@
       <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <SDLCheck>true</SDLCheck>
       <AdditionalIncludeDirectories>$(ProjectDir);$(ProjectDir)XSDX\;$(DXUT_DIR)Optional;$(DXUT_DIR)Core</AdditionalIncludeDirectories>
-      <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
       <FloatingPointModel>Fast</FloatingPointModel>
     </ClCompile>
     <Link>
@@ -98,8 +97,8 @@
       <AdditionalLibraryDirectories>$(DXUT_DIR)Optional\Bin\Win32\Debug;$(DXUT_DIR)Core\Bin\Win32\Debug</AdditionalLibraryDirectories>
     </Link>
     <PostBuildEvent>
-      <Command>COPY /Y "$(OutDir)*.cso" "$(SolutionDir)Bin"
-COPY /Y "$(OutDir)*.exe" "$(SolutionDir)Bin"</Command>
+      <Command>COPY /Y "$(OutDir)*.cso" "$(ProjectDir)..\Bin\"
+COPY /Y "$(OutDir)*.exe" "$(ProjectDir)..\Bin\"</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -110,7 +109,6 @@ COPY /Y "$(OutDir)*.exe" "$(SolutionDir)Bin"</Command>
       <PreprocessorDefinitions>_DEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <SDLCheck>true</SDLCheck>
       <AdditionalIncludeDirectories>$(ProjectDir);$(ProjectDir)XSDX\;$(DXUT_DIR)Optional;$(DXUT_DIR)Core</AdditionalIncludeDirectories>
-      <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
       <FloatingPointModel>Fast</FloatingPointModel>
     </ClCompile>
     <Link>
@@ -119,8 +117,8 @@ COPY /Y "$(OutDir)*.exe" "$(SolutionDir)Bin"</Command>
       <AdditionalLibraryDirectories>$(DXUT_DIR)Optional\Bin\x64\Debug;$(DXUT_DIR)Core\Bin\x64\Debug</AdditionalLibraryDirectories>
     </Link>
     <PostBuildEvent>
-      <Command>COPY /Y "$(OutDir)*.cso" "$(SolutionDir)Bin"
-COPY /Y "$(OutDir)*.exe" "$(SolutionDir)Bin"</Command>
+      <Command>COPY /Y "$(OutDir)*.cso" "$(ProjectDir)..\Bin\"
+COPY /Y "$(OutDir)*.exe" "$(ProjectDir)..\Bin\"</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -133,7 +131,6 @@ COPY /Y "$(OutDir)*.exe" "$(SolutionDir)Bin"</Command>
       <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <SDLCheck>true</SDLCheck>
       <AdditionalIncludeDirectories>$(ProjectDir);$(ProjectDir)XSDX\;$(DXUT_DIR)Optional;$(DXUT_DIR)Core</AdditionalIncludeDirectories>
-      <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
       <FloatingPointModel>Fast</FloatingPointModel>
     </ClCompile>
     <Link>
@@ -144,8 +141,8 @@ COPY /Y "$(OutDir)*.exe" "$(SolutionDir)Bin"</Command>
       <AdditionalLibraryDirectories>$(DXUT_DIR)Optional\Bin\Win32\Release;$(DXUT_DIR)Core\Bin\Win32\Release</AdditionalLibraryDirectories>
     </Link>
     <PostBuildEvent>
-      <Command>COPY /Y "$(OutDir)*.cso" "$(SolutionDir)Bin"
-COPY /Y "$(OutDir)*.exe" "$(SolutionDir)Bin"</Command>
+      <Command>COPY /Y "$(OutDir)*.cso" "$(ProjectDir)..\Bin\"
+COPY /Y "$(OutDir)*.exe" "$(ProjectDir)..\Bin\"</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -158,7 +155,6 @@ COPY /Y "$(OutDir)*.exe" "$(SolutionDir)Bin"</Command>
       <PreprocessorDefinitions>NDEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <SDLCheck>true</SDLCheck>
       <AdditionalIncludeDirectories>$(ProjectDir);$(ProjectDir)XSDX\;$(DXUT_DIR)Optional;$(DXUT_DIR)Core</AdditionalIncludeDirectories>
-      <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
       <FloatingPointModel>Fast</FloatingPointModel>
     </ClCompile>
     <Link>
@@ -169,8 +165,8 @@ COPY /Y "$(OutDir)*.exe" "$(SolutionDir)Bin"</Command>
       <AdditionalLibraryDirectories>$(DXUT_DIR)Optional\Bin\x64\Release;$(DXUT_DIR)Core\Bin\x64\Release</AdditionalLibraryDirectories>
     </Link>
     <PostBuildEvent>
-      <Command>COPY /Y "$(OutDir)*.cso" "$(SolutionDir)Bin"
-COPY /Y "$(OutDir)*.exe" "$(SolutionDir)Bin"</Command>
+      <Command>COPY /Y "$(OutDir)*.cso" "$(ProjectDir)..\Bin\"
+COPY /Y "$(OutDir)*.exe" "$(ProjectDir)..\Bin\"</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
@@ -184,7 +180,7 @@ COPY /Y "$(OutDir)*.exe" "$(SolutionDir)Bin"</Command>
     <ClInclude Include="Content\SharedMacros.h" />
     <ClInclude Include="Resource.h" />
     <ClInclude Include="Smoke3D.h" />
-    <ClInclude Include="pch.h" />
+    <ClInclude Include="stdafx.h" />
     <ClInclude Include="targetver.h" />
     <ClInclude Include="XSDX\XSDXBuffer.h" />
     <ClInclude Include="XSDX\XSDXShader.h" />
@@ -194,18 +190,48 @@ COPY /Y "$(OutDir)*.exe" "$(SolutionDir)Bin"</Command>
     <ClInclude Include="XSDX\XSDXType.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="Content\Fluid3D.cpp" />
-    <ClCompile Include="Content\Poisson3D.cpp" />
-    <ClCompile Include="Smoke3D.cpp" />
-    <ClCompile Include="pch.cpp">
+    <ClCompile Include="Content\Fluid3D.cpp">
+      <ForcedIncludeFiles Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">stdafx.h</ForcedIncludeFiles>
+      <ForcedIncludeFiles Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">stdafx.h</ForcedIncludeFiles>
+      <ForcedIncludeFiles Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">stdafx.h</ForcedIncludeFiles>
+      <ForcedIncludeFiles Condition="'$(Configuration)|$(Platform)'=='Release|x64'">stdafx.h</ForcedIncludeFiles>
+    </ClCompile>
+    <ClCompile Include="Content\Poisson3D.cpp">
+      <ForcedIncludeFiles Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">stdafx.h</ForcedIncludeFiles>
+      <ForcedIncludeFiles Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">stdafx.h</ForcedIncludeFiles>
+      <ForcedIncludeFiles Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">stdafx.h</ForcedIncludeFiles>
+      <ForcedIncludeFiles Condition="'$(Configuration)|$(Platform)'=='Release|x64'">stdafx.h</ForcedIncludeFiles>
+    </ClCompile>
+    <ClCompile Include="Smoke3D.cpp">
+      <ForcedIncludeFiles Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">stdafx.h</ForcedIncludeFiles>
+      <ForcedIncludeFiles Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">stdafx.h</ForcedIncludeFiles>
+      <ForcedIncludeFiles Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">stdafx.h</ForcedIncludeFiles>
+      <ForcedIncludeFiles Condition="'$(Configuration)|$(Platform)'=='Release|x64'">stdafx.h</ForcedIncludeFiles>
+    </ClCompile>
+    <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
-    <ClCompile Include="XSDX\XSDXBuffer.cpp" />
-    <ClCompile Include="XSDX\XSDXShader.cpp" />
-    <ClCompile Include="XSDX\XSDXState.cpp" />
+    <ClCompile Include="XSDX\XSDXBuffer.cpp">
+      <ForcedIncludeFiles Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">stdafx.h</ForcedIncludeFiles>
+      <ForcedIncludeFiles Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">stdafx.h</ForcedIncludeFiles>
+      <ForcedIncludeFiles Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">stdafx.h</ForcedIncludeFiles>
+      <ForcedIncludeFiles Condition="'$(Configuration)|$(Platform)'=='Release|x64'">stdafx.h</ForcedIncludeFiles>
+    </ClCompile>
+    <ClCompile Include="XSDX\XSDXShader.cpp">
+      <ForcedIncludeFiles Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">stdafx.h</ForcedIncludeFiles>
+      <ForcedIncludeFiles Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">stdafx.h</ForcedIncludeFiles>
+      <ForcedIncludeFiles Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">stdafx.h</ForcedIncludeFiles>
+      <ForcedIncludeFiles Condition="'$(Configuration)|$(Platform)'=='Release|x64'">stdafx.h</ForcedIncludeFiles>
+    </ClCompile>
+    <ClCompile Include="XSDX\XSDXState.cpp">
+      <ForcedIncludeFiles Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">stdafx.h</ForcedIncludeFiles>
+      <ForcedIncludeFiles Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">stdafx.h</ForcedIncludeFiles>
+      <ForcedIncludeFiles Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">stdafx.h</ForcedIncludeFiles>
+      <ForcedIncludeFiles Condition="'$(Configuration)|$(Platform)'=='Release|x64'">stdafx.h</ForcedIncludeFiles>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="Smoke3D.rc" />

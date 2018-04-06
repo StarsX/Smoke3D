@@ -2,7 +2,6 @@
 // By Stars XU Tianchen
 //--------------------------------------------------------------------------------------
 
-#include "pch.h"
 #include "Smoke3D.h"
 
 using namespace std;
@@ -350,7 +349,7 @@ HRESULT CALLBACK OnD3D11CreateDevice(ID3D11Device* pd3dDevice, const DXGI_SURFAC
 	g_pState = make_shared<State>(pd3dDevice);
 
 	g_pFluid = make_unique<Fluid3D>(pd3dDevice, g_pShader, g_pState);
-	g_pFluid->Init(64u, 64u, 64u);
+	g_pFluid->Init(64, 64, 64);
 
 	auto loadCSTask = g_pShader->CreateComputeShader(L"CSAdvect3D.cso", g_uCSAdvect);
 	loadCSTask = loadCSTask && g_pShader->CreateComputeShader(L"CSMacCormack3D.cso", g_uCSMacCormack);
@@ -441,11 +440,11 @@ HRESULT CALLBACK OnD3D11ResizedSwapChain(ID3D11Device* pd3dDevice, IDXGISwapChai
 	pBackBuffer->GetDesc(&backBufferSurfaceDesc);
 
 	if (backBufferSurfaceDesc.BindFlags & D3D11_BIND_RENDER_TARGET)
-		MessageBox(nullptr, L"RTV flag is attached to the current swapchain!", L"RTV Flag Checking", 0u);
-	else MessageBox(nullptr, L"RTV flag is not attached to the current swapchain!", L"RTV Flag Checking", 0u);
+		MessageBox(nullptr, L"RTV flag is attached to the current swapchain!", L"RTV Flag Checking", 0);
+	else MessageBox(nullptr, L"RTV flag is not attached to the current swapchain!", L"RTV Flag Checking", 0);
 	if (backBufferSurfaceDesc.BindFlags & D3D11_BIND_UNORDERED_ACCESS)
-		MessageBox(nullptr, L"UAV flag is attached to the current swapchain!", L"UAV Flag Checking", 0u);
-	else MessageBox(nullptr, L"UAV flag is not attached to the current swapchain!", L"UAV Flag Checking", 0u);
+		MessageBox(nullptr, L"UAV flag is attached to the current swapchain!", L"UAV Flag Checking", 0);
+	else MessageBox(nullptr, L"UAV flag is not attached to the current swapchain!", L"UAV Flag Checking", 0);
 #endif
 
 	//g_HUD.SetLocation(pBackBufferSurfaceDesc->Width - 170, 0);
@@ -496,20 +495,20 @@ void CALLBACK OnD3D11FrameRender(ID3D11Device* pd3dDevice, ID3D11DeviceContext* 
 	const auto mLocalToScreen = XMMatrixMultiply(mWorldViewProj, mToScreen);
 	const auto mScreenToLocal = XMMatrixInverse(nullptr, mLocalToScreen);
 	cbPerObject.mScreenToLocal = XMMatrixTranspose(mScreenToLocal);
-	pd3dImmediateContext->UpdateSubresource(g_pCBPerObject.Get(), 0u, nullptr, &cbPerObject, 0u, 0u);
+	pd3dImmediateContext->UpdateSubresource(g_pCBPerObject.Get(), 0, nullptr, &cbPerObject, 0, 0);
 
 	// Simulate
 	g_pFluid->Simulate(max(fElapsedTime, DELTA_TIME), g_vForceDens, g_vImLoc,
-		g_bViscous ? 10ui8 : 0ui8, g_bMacCormack);
+		g_bViscous ? 10 : 0, g_bMacCormack);
 
-	pd3dImmediateContext->CSSetConstantBuffers(0u, 1u, g_pCBImmutable.GetAddressOf());
-	pd3dImmediateContext->CSSetConstantBuffers(2u, 1u, g_pCBPerObject.GetAddressOf());
+	pd3dImmediateContext->CSSetConstantBuffers(0, 1, g_pCBImmutable.GetAddressOf());
+	pd3dImmediateContext->CSSetConstantBuffers(2, 1, g_pCBPerObject.GetAddressOf());
 
 	// Render
 	g_pFluid->Render(g_pUAVSwapChain);
 
 	const auto pRTV = DXUTGetD3D11RenderTargetView();
-	pd3dImmediateContext->OMSetRenderTargets(1u, &pRTV, nullptr);
+	pd3dImmediateContext->OMSetRenderTargets(1, &pRTV, nullptr);
 
 	DXUT_BeginPerfEvent(DXUT_PERFEVENTCOLOR, L"HUD / Stats");
 	if (g_bShowFPS)

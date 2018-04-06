@@ -2,7 +2,6 @@
 // By Stars XU Tianchen
 //--------------------------------------------------------------------------------------
 
-#include "pch.h"
 #include "SharedMacros.h"
 #include "Poisson3D.h"
 
@@ -19,12 +18,12 @@ Poisson3D::Poisson3D(const CPDXDevice &pDXDevice, const spShader &pShader, const
 	m_pDXDevice(pDXDevice),
 	m_pShader(pShader),
 	m_pState(pState),
-	m_uCSIteration(0ui8),
-	m_uCSTemporal(1ui8),
-	m_uCSDiv(2ui8),
-	m_uUASlot(0ui8),
-	m_uSRField(0ui8),
-	m_uSmpLinearClamp(1ui8)
+	m_uCSIteration(0),
+	m_uCSTemporal(1),
+	m_uCSDiv(2),
+	m_uUASlot(0),
+	m_uSRField(0),
+	m_uSmpLinearClamp(1)
 {
 	m_pDXDevice->GetImmediateContext(&m_pDXContext);
 }
@@ -45,13 +44,13 @@ void Poisson3D::Init(const uint32_t uWidth, const uint32_t uHeight, const uint32
 	// Create 3D textures
 	m_pSrcKnown = make_shared<Texture3D>(m_pDXDevice);
 	m_pDstUnknown = make_shared<Texture3D>(m_pDXDevice);
-	m_pSrcKnown->Create(true, false, uWidth, uHeight, uDepth, format, 1ui8, vData.data(), uStride);
+	m_pSrcKnown->Create(true, false, uWidth, uHeight, uDepth, format, 1, vData.data(), uStride);
 	m_pDstUnknown->Create(true, false, uWidth, uHeight, uDepth, format);
 
 	if (format != DXGI_FORMAT_R32_FLOAT && format != DXGI_FORMAT_R16_FLOAT)
 	{
 		m_pSrcUnknown = make_shared<Texture3D>(m_pDXDevice);
-		m_pSrcUnknown->Create(true, false, uWidth, uHeight, uDepth, format, 1ui8, vData.data(), uStride);
+		m_pSrcUnknown->Create(true, false, uWidth, uHeight, uDepth, format, 1, vData.data(), uStride);
 	}
 	else m_pSrcUnknown = nullptr;
 
@@ -68,16 +67,16 @@ void Poisson3D::SetShaders(const uint8_t uCSIteration, const uint8_t uCSTemporal
 void Poisson3D::ComputeDivergence(const CPDXShaderResourceView &srvSource)
 {
 	// Setup
-	m_pDXContext->CSSetUnorderedAccessViews(m_uUASlot, 1u, m_pDstUnknown->GetUAV().GetAddressOf(), &g_uNullUint);
-	m_pDXContext->CSSetShaderResources(m_uSRField, 1u, srvSource.GetAddressOf());
+	m_pDXContext->CSSetUnorderedAccessViews(m_uUASlot, 1, m_pDstUnknown->GetUAV().GetAddressOf(), &g_uNullUint);
+	m_pDXContext->CSSetShaderResources(m_uSRField, 1, srvSource.GetAddressOf());
 
 	// Compute Divergence
-	m_pDXContext->CSSetShader(m_pShader->GetComputeShader(m_uCSDiv).Get(), nullptr, 0u);
+	m_pDXContext->CSSetShader(m_pShader->GetComputeShader(m_uCSDiv).Get(), nullptr, 0);
 	m_pDXContext->Dispatch(m_vThreadGroupSize.x, m_vThreadGroupSize.y, m_vThreadGroupSize.z);
 
 	// Unset
-	m_pDXContext->CSSetShaderResources(m_uSRField, 1u, &g_pNullSRV);
-	m_pDXContext->CSSetUnorderedAccessViews(m_uUASlot, 1u, &g_pNullUAV, &g_uNullUint);
+	m_pDXContext->CSSetShaderResources(m_uSRField, 1, &g_pNullSRV);
+	m_pDXContext->CSSetUnorderedAccessViews(m_uUASlot, 1, &g_pNullUAV, &g_uNullUint);
 
 	// Swap buffers
 	SwapTextures();
@@ -86,7 +85,7 @@ void Poisson3D::ComputeDivergence(const CPDXShaderResourceView &srvSource)
 void Poisson3D::SolvePoisson(const uint8_t uIteration)
 {
 	// Setup
-	m_pDXContext->CSSetShaderResources(m_uSRField, 1u, m_pSrcKnown->GetSRV().GetAddressOf());
+	m_pDXContext->CSSetShaderResources(m_uSRField, 1, m_pSrcKnown->GetSRV().GetAddressOf());
 
 	// Iterations
 	if (m_pSrcUnknown) for (auto i = 0ui8; i < uIteration; ++i) jacobi();
@@ -94,8 +93,8 @@ void Poisson3D::SolvePoisson(const uint8_t uIteration)
 
 	// Unset
 	const auto pSRVs = array<LPDXShaderResourceView, 2>{ { nullptr, nullptr } };
-	m_pDXContext->CSSetShaderResources(m_uSRField, 2u, pSRVs.data());
-	m_pDXContext->CSSetUnorderedAccessViews(m_uUASlot, 1u, &g_pNullUAV, &g_uNullUint);
+	m_pDXContext->CSSetShaderResources(m_uSRField, uint32_t(pSRVs.size()), pSRVs.data());
+	m_pDXContext->CSSetUnorderedAccessViews(m_uUASlot, 1, &g_pNullUAV, &g_uNullUint);
 
 	// Swap buffers
 	SwapTextures();
@@ -106,18 +105,18 @@ void Poisson3D::Advect(const CPDXShaderResourceView &srvSource)
 	// Setup
 	const auto pSRVs = array<LPDXShaderResourceView, 2>
 	{ { m_pSrcKnown->GetSRV().Get(), srvSource.Get() } };
-	m_pDXContext->CSSetUnorderedAccessViews(m_uUASlot, 1u, m_pDstUnknown->GetUAV().GetAddressOf(), &g_uNullUint);
-	m_pDXContext->CSSetShaderResources(m_uSRField, 2u, pSRVs.data());
-	m_pDXContext->CSSetSamplers(m_uSmpLinearClamp, 1u, m_pState->LinearClamp().GetAddressOf());
+	m_pDXContext->CSSetUnorderedAccessViews(m_uUASlot, 1, m_pDstUnknown->GetUAV().GetAddressOf(), &g_uNullUint);
+	m_pDXContext->CSSetShaderResources(m_uSRField, uint32_t(pSRVs.size()), pSRVs.data());
+	m_pDXContext->CSSetSamplers(m_uSmpLinearClamp, 1, m_pState->LinearClamp().GetAddressOf());
 
 	// Compute Divergence
-	m_pDXContext->CSSetShader(m_pShader->GetComputeShader(m_uCSTemporal).Get(), nullptr, 0u);
+	m_pDXContext->CSSetShader(m_pShader->GetComputeShader(m_uCSTemporal).Get(), nullptr, 0);
 	m_pDXContext->Dispatch(m_vThreadGroupSize.x, m_vThreadGroupSize.y, m_vThreadGroupSize.z);
 
 	// Unset
-	const auto pNullSRVs = array<LPDXShaderResourceView, 2>{ { nullptr, nullptr } };
-	m_pDXContext->CSSetShaderResources(m_uSRField, 2u, pNullSRVs.data());
-	m_pDXContext->CSSetUnorderedAccessViews(m_uUASlot, 1u, &g_pNullUAV, &g_uNullUint);
+	const auto pNullSRVs = array<LPDXShaderResourceView, pSRVs.size()>{ { nullptr, nullptr } };
+	m_pDXContext->CSSetShaderResources(m_uSRField, uint32_t(pNullSRVs.size()), pNullSRVs.data());
+	m_pDXContext->CSSetUnorderedAccessViews(m_uUASlot, 1, &g_pNullUAV, &g_uNullUint);
 
 	// Swap buffers
 	SwapTextures();
@@ -147,25 +146,25 @@ const spTexture3D &Poisson3D::GetTmp() const
 void Poisson3D::gaussSeidel()
 {
 	// Setup
-	m_pDXContext->CSSetUnorderedAccessViews(m_uUASlot, 1u, m_pDstUnknown->GetUAV().GetAddressOf(), &g_uNullUint);
+	m_pDXContext->CSSetUnorderedAccessViews(m_uUASlot, 1, m_pDstUnknown->GetUAV().GetAddressOf(), &g_uNullUint);
 
 	// Iterations
-	m_pDXContext->CSSetShader(m_pShader->GetComputeShader(m_uCSIteration).Get(), nullptr, 0u);
+	m_pDXContext->CSSetShader(m_pShader->GetComputeShader(m_uCSIteration).Get(), nullptr, 0);
 	m_pDXContext->Dispatch(m_vThreadGroupSize.x, m_vThreadGroupSize.y, m_vThreadGroupSize.z);
 }
 
 void Poisson3D::jacobi()
 {
 	// Setup
-	m_pDXContext->CSSetUnorderedAccessViews(m_uUASlot, 1u, m_pDstUnknown->GetUAV().GetAddressOf(), &g_uNullUint);
-	m_pDXContext->CSSetShaderResources(m_uSRField + 1u, 1u, m_pSrcUnknown->GetSRV().GetAddressOf());
+	m_pDXContext->CSSetUnorderedAccessViews(m_uUASlot, 1, m_pDstUnknown->GetUAV().GetAddressOf(), &g_uNullUint);
+	m_pDXContext->CSSetShaderResources(m_uSRField + 1, 1, m_pSrcUnknown->GetSRV().GetAddressOf());
 
 	// Jacobi iteration
-	m_pDXContext->CSSetShader(m_pShader->GetComputeShader(m_uCSIteration).Get(), nullptr, 0u);
+	m_pDXContext->CSSetShader(m_pShader->GetComputeShader(m_uCSIteration).Get(), nullptr, 0);
 	m_pDXContext->Dispatch(m_vThreadGroupSize.x, m_vThreadGroupSize.y, m_vThreadGroupSize.z);
 
 	// Unset
-	m_pDXContext->CSSetShaderResources(m_uSRField + 1u, 1u, &g_pNullSRV);
+	m_pDXContext->CSSetShaderResources(m_uSRField + 1, 1, &g_pNullSRV);
 
 	// Swap buffers
 	m_pSrcUnknown.swap(m_pDstUnknown);

@@ -2,7 +2,6 @@
 // By Stars XU Tianchen
 //--------------------------------------------------------------------------------------
 
-#include "pch.h"
 #include "XSDXShader.h"
 
 using namespace std;
@@ -12,6 +11,10 @@ using namespace XSDX;
 
 Shader::Shader(const CPDXDevice &pDXDevice) :
 	m_pDXDevice(pDXDevice)
+{
+}
+
+Shader::~Shader(void)
 {
 }
 
@@ -96,19 +99,19 @@ TaskVoid Shader::CreateGeometryShader(const wstring &szFileName, const uint8_t i
 }
 
 TaskVoid Shader::CreateGeometryShaderWithSO(const wstring &szFileName, const uint8_t i,
-	const LPCD3D11_SO_DECLARATION_ENTRY pDecl, const uint8_t uNumEntry)
+	const LPCD3D11_SO_DECLARATION_ENTRY pDecl, const uint8_t uNumEntries)
 {
 	auto loadGSTask = ReadShaderFile(szFileName);
 
 	// Create the shader
-	return loadGSTask.then([this, i, pDecl, uNumEntry](const CPDXBlob &pFileData)
+	return loadGSTask.then([this, i, pDecl, uNumEntries](const CPDXBlob &pFileData)
 	{
 		auto uStride = 0u;
-		for (auto j = 0ui8; j < uNumEntry; ++j)
+		for (auto j = 0ui8; j < uNumEntries; ++j)
 			uStride += pDecl[j].ComponentCount * sizeof(float);
 		ThrowIfFailed(m_pDXDevice->CreateGeometryShaderWithStreamOutput(
 			pFileData->GetBufferPointer(), pFileData->GetBufferSize(), pDecl,
-			uNumEntry, &uStride, 1u, 0u, nullptr, &m_ppGeometryShaders[i]));
+			uNumEntries, &uStride, 1, 0, nullptr, &m_ppGeometryShaders[i]));
 		ThrowIfFailed(D3DReflect(pFileData->GetBufferPointer(), pFileData->GetBufferSize(),
 			IID_ID3D11ShaderReflection, &m_ppGSReflectors[i]));
 	});
@@ -143,16 +146,16 @@ TaskVoid Shader::CreateComputeShader(const wstring &szFileName, const uint8_t i)
 }
 
 void Shader::CreateGeometryShaderWithSO(const uint8_t i, const LPCD3D11_SO_DECLARATION_ENTRY pDecl,
-	const uint8_t uNumEntry)
+	const uint8_t uNumEntries)
 {
 	// Create the shader
 	auto uStride = 0u;
-	for (auto j = 0ui8; j < uNumEntry; ++j)
+	for (auto j = 0ui8; j < uNumEntries; ++j)
 		uStride += pDecl[j].ComponentCount * sizeof(float);
 
 	ThrowIfFailed(m_pDXDevice->CreateGeometryShaderWithStreamOutput(
 		m_ppVSBuffers[i]->GetBufferPointer(), m_ppVSBuffers[i]->GetBufferSize(),
-		pDecl, uNumEntry, &uStride, 1u, 0u, nullptr, &m_ppGeometryShaders[i]));
+		pDecl, uNumEntries, &uStride, 1, 0, nullptr, &m_ppGeometryShaders[i]));
 	ThrowIfFailed(D3DReflect(m_ppVSBuffers[i]->GetBufferPointer(), m_ppVSBuffers[i]->GetBufferSize(),
 		IID_ID3D11ShaderReflection, &m_ppGSReflectors[i]));
 }

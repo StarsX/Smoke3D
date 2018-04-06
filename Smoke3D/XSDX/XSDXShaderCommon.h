@@ -47,10 +47,8 @@ namespace XSDX
 		DirectX::XMFLOAT4X4	m_mViewProj;
 		DirectX::XMFLOAT4X4	m_mView;
 		DirectX::XMFLOAT4	m_vLightPtETime;
-#if	TEMPORAL_AA
-		DirectX::XMFLOAT4	m_vProjBias[2];
-#endif
 	};
+	using LPCBGlobal = std::add_pointer_t<CBGlobal>;
 #endif
 
 #endif
@@ -146,6 +144,6 @@ namespace XSDX
 #ifndef	BASIC_SHADER_SLOTS
 #define	BASIC_SHADER_SLOTS
 	// Other constant slots
-	static const auto		g_uCBBound		(3ui8);
+	static const uint8_t	g_uCBBound		(3);
 #endif
 }
