@@ -418,13 +418,8 @@ HRESULT CALLBACK OnD3D11ResizedSwapChain(ID3D11Device* pd3dDevice, IDXGISwapChai
 	g_Camera.SetButtonMasks(MOUSE_MIDDLE_BUTTON, MOUSE_WHEEL, MOUSE_RIGHT_BUTTON);
 
 	// Initialize window size dependent resources
-	// Viewport clipping
-	auto iVpNum = 1u;
-	D3D11_VIEWPORT viewport;
-	DXUTGetD3D11DeviceContext()->RSGetViewports(&iVpNum, &viewport);
-
 	// Set window size dependent constants
-	g_vViewport = XMFLOAT2(viewport.Width, viewport.Height);
+	g_vViewport = XMFLOAT2(static_cast<float>(pBackBufferSurfaceDesc->Width), static_cast<float>(pBackBufferSurfaceDesc->Height));
 
 	// Get the back buffer
 	auto pBackBuffer = CPDXTexture2D();
