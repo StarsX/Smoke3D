@@ -44,13 +44,13 @@ void Poisson3D::Init(const uint32_t uWidth, const uint32_t uHeight, const uint32
 	// Create 3D textures
 	m_pSrcKnown = make_shared<Texture3D>(m_pDXDevice);
 	m_pDstUnknown = make_shared<Texture3D>(m_pDXDevice);
-	m_pSrcKnown->Create(true, false, uWidth, uHeight, uDepth, format, 1, vData.data(), uStride);
-	m_pDstUnknown->Create(true, false, uWidth, uHeight, uDepth, format);
+	m_pSrcKnown->Create(uWidth, uHeight, uDepth, format, true, true, false, 1, vData.data(), uStride);
+	m_pDstUnknown->Create(uWidth, uHeight, uDepth, format);
 
 	if (format != DXGI_FORMAT_R32_FLOAT && format != DXGI_FORMAT_R16_FLOAT)
 	{
 		m_pSrcUnknown = make_shared<Texture3D>(m_pDXDevice);
-		m_pSrcUnknown->Create(true, false, uWidth, uHeight, uDepth, format, 1, vData.data(), uStride);
+		m_pSrcUnknown->Create(uWidth, uHeight, uDepth, format, true, true, false, 1, vData.data(), uStride);
 	}
 	else m_pSrcUnknown = nullptr;
 

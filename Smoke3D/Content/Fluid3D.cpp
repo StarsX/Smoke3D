@@ -43,12 +43,12 @@ void Fluid3D::Init(const uint32_t uWidth, const uint32_t uHeight, const uint32_t
 	// Create 3D textures
 	m_pSrcDensity = make_unique<Texture3D>(m_pDXDevice);
 	m_pDstDensity = make_unique<Texture3D>(m_pDXDevice);
-	m_pSrcDensity->Create(true, false, uWidth, uHeight, uDepth, DXGI_FORMAT_R16_FLOAT);
-	m_pDstDensity->Create(true, false, uWidth, uHeight, uDepth, DXGI_FORMAT_R16_FLOAT);
+	m_pSrcDensity->Create(uWidth, uHeight, uDepth, DXGI_FORMAT_R16_FLOAT);
+	m_pDstDensity->Create(uWidth, uHeight, uDepth, DXGI_FORMAT_R16_FLOAT);
 
 	// For macCormack advection
 	m_pTmpDensity = make_unique<Texture3D>(m_pDXDevice);
-	m_pTmpDensity->Create(true, false, uWidth, uHeight, uDepth, DXGI_FORMAT_R16_FLOAT);
+	m_pTmpDensity->Create(uWidth, uHeight, uDepth, DXGI_FORMAT_R16_FLOAT);
 
 	m_pDiffuse->Init(uWidth, uHeight, uDepth, sizeof(uint16_t[4]), DXGI_FORMAT_R16G16B16A16_FLOAT);
 	m_pPressure->Init(uWidth, uHeight, uDepth, sizeof(float), DXGI_FORMAT_R32_FLOAT);
