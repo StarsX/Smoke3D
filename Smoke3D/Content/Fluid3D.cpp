@@ -65,7 +65,7 @@ void Fluid3D::Simulate(const float fDeltaTime, const DirectX::XMFLOAT4 vForceDen
 	m_vPerFrames[1] = XMFLOAT4(vImLoc.x, vImLoc.y, vImLoc.z, fDeltaTime);
 	const auto pCBs = array<LPDXBuffer, 2>{ { m_pCBImmutables[bMacCormack].Get(), m_pCBPerFrame.Get() } };
 	m_pDXContext->UpdateSubresource(m_pCBPerFrame.Get(), 0, nullptr, m_vPerFrames, 0, 0);
-	m_pDXContext->CSSetConstantBuffers(m_uCBImmutable, uint32_t(pCBs.size()), pCBs.data());
+	m_pDXContext->CSSetConstantBuffers(m_uCBImmutable, static_cast<uint32_t>(pCBs.size()), pCBs.data());
 
 	advect(fDeltaTime, bMacCormack);
 	diffuse(uItVisc);
@@ -73,7 +73,7 @@ void Fluid3D::Simulate(const float fDeltaTime, const DirectX::XMFLOAT4 vForceDen
 	project();
 
 	const auto pUAVs = array<LPDXUnorderedAccessView, 2>{ { nullptr, nullptr } };
-	m_pDXContext->CSSetUnorderedAccessViews(m_uUASlot, uint32_t(pUAVs.size()), pUAVs.data(), &g_uNullUint);
+	m_pDXContext->CSSetUnorderedAccessViews(m_uUASlot, static_cast<uint32_t>(pUAVs.size()), pUAVs.data(), &g_uNullUint);
 }
 
 void Fluid3D::Render(const XSDX::CPDXUnorderedAccessView &pUAVSwapChain)
@@ -140,8 +140,8 @@ void Fluid3D::advect(const float fDeltaTime, const CPDXShaderResourceView& pSRVV
 	{ { m_pDstVelocity->GetUAV().Get(), m_pDstDensity->GetUAV().Get() } };
 	const auto pSRVs = array<LPDXShaderResourceView, 3>
 	{ { m_pSrcVelocity->GetSRV().Get(), m_pSrcDensity->GetSRV().Get(), pSRVVelocity.Get() } };
-	m_pDXContext->CSSetUnorderedAccessViews(m_uUASlot, uint32_t(pUAVs.size()), pUAVs.data(), &g_uNullUint);
-	m_pDXContext->CSSetShaderResources(m_uSRField, uint32_t(pSRVs.size()), pSRVs.data());
+	m_pDXContext->CSSetUnorderedAccessViews(m_uUASlot, static_cast<uint32_t>(pUAVs.size()), pUAVs.data(), &g_uNullUint);
+	m_pDXContext->CSSetShaderResources(m_uSRField, static_cast<uint32_t>(pSRVs.size()), pSRVs.data());
 	m_pDXContext->CSSetSamplers(m_uSmpLinearClamp, 1, m_pState->LinearClamp().GetAddressOf());
 
 	// Advect velocity and density
@@ -150,7 +150,7 @@ void Fluid3D::advect(const float fDeltaTime, const CPDXShaderResourceView& pSRVV
 
 	// Unset
 	const auto pNullSRVs = array<LPDXShaderResourceView, pSRVs.size()>{ { nullptr } };
-	m_pDXContext->CSSetShaderResources(m_uSRField, uint32_t(pNullSRVs.size()), pNullSRVs.data());
+	m_pDXContext->CSSetShaderResources(m_uSRField, static_cast<uint32_t>(pNullSRVs.size()), pNullSRVs.data());
 
 	// Swap buffers
 	m_pDiffuse->SwapTextures();
@@ -172,9 +172,9 @@ void Fluid3D::macCormack(const float fDeltaTime, const CPDXShaderResourceView& p
 		m_pSrcVelocity->GetSRV().Get(), m_pSrcDensity->GetSRV().Get() } };
 	const auto pSamplers = array<LPDXSamplerState, 2>
 	{ { m_pState->LinearClamp().Get(), m_pState->PointClamp().Get() } };
-	m_pDXContext->CSSetUnorderedAccessViews(m_uUASlot, uint32_t(pUAVs.size()), pUAVs.data(), &g_uNullUint);
-	m_pDXContext->CSSetShaderResources(m_uSRField, uint32_t(pSRVs.size()), pSRVs.data());
-	m_pDXContext->CSSetSamplers(m_uSmpLinearClamp, uint32_t(pSamplers.size()), pSamplers.data());
+	m_pDXContext->CSSetUnorderedAccessViews(m_uUASlot, static_cast<uint32_t>(pUAVs.size()), pUAVs.data(), &g_uNullUint);
+	m_pDXContext->CSSetShaderResources(m_uSRField, static_cast<uint32_t>(pSRVs.size()), pSRVs.data());
+	m_pDXContext->CSSetSamplers(m_uSmpLinearClamp, static_cast<uint32_t>(pSamplers.size()), pSamplers.data());
 
 	// Advect velocity and density
 	m_pDXContext->CSSetShader(m_pShader->GetComputeShader(g_uCSMacCormack).Get(), nullptr, 0);
@@ -182,7 +182,7 @@ void Fluid3D::macCormack(const float fDeltaTime, const CPDXShaderResourceView& p
 
 	// Unset
 	const auto pNullSRVs = array<LPDXShaderResourceView, pSRVs.size()>{ { nullptr } };
-	m_pDXContext->CSSetShaderResources(m_uSRField, uint32_t(pNullSRVs.size()), pNullSRVs.data());
+	m_pDXContext->CSSetShaderResources(m_uSRField, static_cast<uint32_t>(pNullSRVs.size()), pNullSRVs.data());
 
 	// Swap buffers
 	m_pDiffuse->SwapTextures();
@@ -208,8 +208,8 @@ void Fluid3D::impulse()
 	{ { m_pDstVelocity->GetUAV().Get(), m_pDstDensity->GetUAV().Get() } };
 	const auto pSRVs = array<LPDXShaderResourceView, 2>
 	{ { m_pSrcVelocity->GetSRV().Get(), m_pSrcDensity->GetSRV().Get() } };
-	m_pDXContext->CSSetUnorderedAccessViews(m_uUASlot, uint32_t(pUAVs.size()), pUAVs.data(), &g_uNullUint);
-	m_pDXContext->CSSetShaderResources(m_uSRField, uint32_t(pSRVs.size()), pSRVs.data());
+	m_pDXContext->CSSetUnorderedAccessViews(m_uUASlot, static_cast<uint32_t>(pUAVs.size()), pUAVs.data(), &g_uNullUint);
+	m_pDXContext->CSSetShaderResources(m_uSRField, static_cast<uint32_t>(pSRVs.size()), pSRVs.data());
 
 	// Add force and density
 	m_pDXContext->CSSetShader(m_pShader->GetComputeShader(g_uCSImpulse).Get(), nullptr, 0);
@@ -217,7 +217,7 @@ void Fluid3D::impulse()
 
 	// Unset
 	const auto pNullSRVs = array<LPDXShaderResourceView, pSRVs.size()>{ { nullptr } };
-	m_pDXContext->CSSetShaderResources(m_uSRField, uint32_t(pNullSRVs.size()), pNullSRVs.data());
+	m_pDXContext->CSSetShaderResources(m_uSRField, static_cast<uint32_t>(pNullSRVs.size()), pNullSRVs.data());
 
 	// Swap buffers
 	m_pDiffuse->SwapTextures();
@@ -239,7 +239,7 @@ void Fluid3D::project()
 		const auto pSRVs = array<LPDXShaderResourceView, 2>
 		{ { m_pSrcVelocity->GetSRV().Get(), m_pPressure->GetSrc()->GetSRV().Get() } };
 		m_pDXContext->CSSetUnorderedAccessViews(m_uUASlot, 1, m_pDstVelocity->GetUAV().GetAddressOf(), &g_uNullUint);
-		m_pDXContext->CSSetShaderResources(m_uSRField, uint32_t(pSRVs.size()), pSRVs.data());
+		m_pDXContext->CSSetShaderResources(m_uSRField, static_cast<uint32_t>(pSRVs.size()), pSRVs.data());
 
 		// Compute projection
 		m_pDXContext->CSSetShader(m_pShader->GetComputeShader(g_uCSProject).Get(), nullptr, 0);
@@ -247,7 +247,7 @@ void Fluid3D::project()
 
 		// Unset
 		const auto pNullSRVs = array<LPDXShaderResourceView, pSRVs.size()>{ { nullptr } };
-		m_pDXContext->CSSetShaderResources(m_uSRField, uint32_t(pNullSRVs.size()), pNullSRVs.data());
+		m_pDXContext->CSSetShaderResources(m_uSRField, static_cast<uint32_t>(pNullSRVs.size()), pNullSRVs.data());
 
 		// Swap buffers
 		m_pDiffuse->SwapTextures();
