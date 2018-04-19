@@ -37,7 +37,7 @@ spState							g_pState;
 CPDXBuffer						g_pCBImmutable;
 CPDXBuffer						g_pCBPerObject;
 
-CPDXUnorderedAccessView			g_pUAVSwapChain;
+IDXGISwapChain					*g_pSwapChain;
 
 XMFLOAT2						g_vViewport;
 XMFLOAT3						g_vMouse;
@@ -420,27 +420,7 @@ HRESULT CALLBACK OnD3D11ResizedSwapChain(ID3D11Device* pd3dDevice, IDXGISwapChai
 	// Initialize window size dependent resources
 	// Set window size dependent constants
 	g_vViewport = XMFLOAT2(static_cast<float>(pBackBufferSurfaceDesc->Width), static_cast<float>(pBackBufferSurfaceDesc->Height));
-
-	// Get the back buffer
-	auto pBackBuffer = CPDXTexture2D();
-	ThrowIfFailed(pSwapChain->GetBuffer(0, IID_PPV_ARGS(&pBackBuffer)));
-
-	// Create UAV
-	const auto uavDesc = CD3D11_UNORDERED_ACCESS_VIEW_DESC(pBackBuffer.Get(), D3D11_UAV_DIMENSION_TEXTURE2D);
-	ThrowIfFailed(pd3dDevice->CreateUnorderedAccessView(pBackBuffer.Get(), &uavDesc, &g_pUAVSwapChain));
-
-#if defined(DEBUG) | defined(_DEBUG)
-	// Get the back buffer desc
-	auto backBufferSurfaceDesc = D3D11_TEXTURE2D_DESC();
-	pBackBuffer->GetDesc(&backBufferSurfaceDesc);
-
-	if (backBufferSurfaceDesc.BindFlags & D3D11_BIND_RENDER_TARGET)
-		MessageBox(nullptr, L"RTV flag is attached to the current swapchain!", L"RTV Flag Checking", 0);
-	else MessageBox(nullptr, L"RTV flag is not attached to the current swapchain!", L"RTV Flag Checking", 0);
-	if (backBufferSurfaceDesc.BindFlags & D3D11_BIND_UNORDERED_ACCESS)
-		MessageBox(nullptr, L"UAV flag is attached to the current swapchain!", L"UAV Flag Checking", 0);
-	else MessageBox(nullptr, L"UAV flag is not attached to the current swapchain!", L"UAV Flag Checking", 0);
-#endif
+	g_pSwapChain = pSwapChain;
 
 	//g_HUD.SetLocation(pBackBufferSurfaceDesc->Width - 170, 0);
 	//g_HUD.SetSize(170, 170);
@@ -457,10 +437,32 @@ void CALLBACK OnD3D11FrameRender(ID3D11Device* pd3dDevice, ID3D11DeviceContext* 
 	float fElapsedTime, void* pUserContext)
 {
 	// Loading is asynchronous. Only draw geometry after it's loaded.
-	if (!g_bLoadingComplete) return;
+	if (!g_bLoadingComplete || !g_pSwapChain) return;
+
+	// Get the back buffer
+	auto pBackBuffer = CPDXTexture2D();
+	ThrowIfFailed(g_pSwapChain->GetBuffer(0, IID_PPV_ARGS(&pBackBuffer)));
+
+	// Create UAV
+	auto pUAVSwapChain = CPDXUnorderedAccessView();
+	const auto uavDesc = CD3D11_UNORDERED_ACCESS_VIEW_DESC(pBackBuffer.Get(), D3D11_UAV_DIMENSION_TEXTURE2D);
+	ThrowIfFailed(pd3dDevice->CreateUnorderedAccessView(pBackBuffer.Get(), &uavDesc, &pUAVSwapChain));
+
+#if defined(DEBUG) | defined(_DEBUG)
+	// Get the back buffer desc
+	auto backBufferSurfaceDesc = D3D11_TEXTURE2D_DESC();
+	pBackBuffer->GetDesc(&backBufferSurfaceDesc);
+
+	if (backBufferSurfaceDesc.BindFlags & D3D11_BIND_RENDER_TARGET)
+		MessageBox(nullptr, L"RTV flag is attached to the current swapchain!", L"RTV Flag Checking", 0);
+	else MessageBox(nullptr, L"RTV flag is not attached to the current swapchain!", L"RTV Flag Checking", 0);
+	if (backBufferSurfaceDesc.BindFlags & D3D11_BIND_UNORDERED_ACCESS)
+		MessageBox(nullptr, L"UAV flag is attached to the current swapchain!", L"UAV Flag Checking", 0);
+	else MessageBox(nullptr, L"UAV flag is not attached to the current swapchain!", L"UAV Flag Checking", 0);
+#endif
 
 	// Clear screen.
-	pd3dImmediateContext->ClearUnorderedAccessViewFloat(g_pUAVSwapChain.Get(), DirectX::Colors::CornflowerBlue);
+	pd3dImmediateContext->ClearUnorderedAccessViewFloat(pUAVSwapChain.Get(), DirectX::Colors::CornflowerBlue);
 
 	// Prepare the constant buffer to send it to the graphics device.
 	// Get the projection & view matrix from the camera class
@@ -500,7 +502,7 @@ void CALLBACK OnD3D11FrameRender(ID3D11Device* pd3dDevice, ID3D11DeviceContext* 
 	pd3dImmediateContext->CSSetConstantBuffers(2, 1, g_pCBPerObject.GetAddressOf());
 
 	// Render
-	g_pFluid->Render(g_pUAVSwapChain);
+	g_pFluid->Render(pUAVSwapChain);
 
 	const auto pRTV = DXUTGetD3D11RenderTargetView();
 	pd3dImmediateContext->OMSetRenderTargets(1, &pRTV, nullptr);
@@ -531,7 +533,6 @@ void CALLBACK OnD3D11DestroyDevice(void* pUserContext)
 	DXUTGetGlobalResourceCache().OnDestroyDevice();
 
 	g_bLoadingComplete = false;
-	g_pUAVSwapChain.Reset();
 	g_pCBPerObject.Reset();
 	g_pCBImmutable.Reset();
 	g_pTxtHelper.reset();
