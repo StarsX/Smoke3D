@@ -37,7 +37,7 @@ spState							g_pState;
 CPDXBuffer						g_pCBImmutable;
 CPDXBuffer						g_pCBPerObject;
 
-IDXGISwapChain					*g_pSwapChain;
+IDXGISwapChain					*g_pSwapChain = nullptr;
 
 XMFLOAT2						g_vViewport;
 XMFLOAT3						g_vMouse;
