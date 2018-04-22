@@ -449,17 +449,28 @@ void CALLBACK OnD3D11FrameRender(ID3D11Device* pd3dDevice, ID3D11DeviceContext* 
 	ThrowIfFailed(pd3dDevice->CreateUnorderedAccessView(pBackBuffer.Get(), &uavDesc, &pUAVSwapChain));
 
 #if defined(DEBUG) | defined(_DEBUG)
-	// Get the back buffer desc
-	auto backBufferSurfaceDesc = D3D11_TEXTURE2D_DESC();
-	pBackBuffer->GetDesc(&backBufferSurfaceDesc);
+	static auto bFirstTime = true;
 
-	if (backBufferSurfaceDesc.BindFlags & D3D11_BIND_RENDER_TARGET)
-		MessageBox(nullptr, L"RTV flag is attached to the current swapchain!", L"RTV Flag Checking", 0);
-	else MessageBox(nullptr, L"RTV flag is not attached to the current swapchain!", L"RTV Flag Checking", 0);
-	if (backBufferSurfaceDesc.BindFlags & D3D11_BIND_UNORDERED_ACCESS)
-		MessageBox(nullptr, L"UAV flag is attached to the current swapchain!", L"UAV Flag Checking", 0);
-	else MessageBox(nullptr, L"UAV flag is not attached to the current swapchain!", L"UAV Flag Checking", 0);
+	if (bFirstTime)
+	{
+		// Get the back buffer desc
+		auto backBufferSurfaceDesc = D3D11_TEXTURE2D_DESC();
+		pBackBuffer->GetDesc(&backBufferSurfaceDesc);
+
+		if (backBufferSurfaceDesc.BindFlags & D3D11_BIND_RENDER_TARGET)
+			printf("RTV flag is attached to the current swapchain!\n");
+		else printf("RTV flag is NOT attached to the current swapchain!\n");
+		if (backBufferSurfaceDesc.BindFlags & D3D11_BIND_UNORDERED_ACCESS)
+			printf("UAV flag is attached to the current swapchain!\n");
+		else printf("UAV flag is NOT attached to the current swapchain!\n");
+
+		bFirstTime = false;
+	}
 #endif
+
+	// Set null rendertarget.
+	const auto pRTV = DXUTGetD3D11RenderTargetView();
+	pd3dImmediateContext->OMSetRenderTargets(0, nullptr, nullptr);
 
 	// Clear screen.
 	pd3dImmediateContext->ClearUnorderedAccessViewFloat(pUAVSwapChain.Get(), DirectX::Colors::CornflowerBlue);
@@ -504,9 +515,7 @@ void CALLBACK OnD3D11FrameRender(ID3D11Device* pd3dDevice, ID3D11DeviceContext* 
 	// Render
 	g_pFluid->Render(pUAVSwapChain);
 
-	const auto pRTV = DXUTGetD3D11RenderTargetView();
 	pd3dImmediateContext->OMSetRenderTargets(1, &pRTV, nullptr);
-
 	DXUT_BeginPerfEvent(DXUT_PERFEVENTCOLOR, L"HUD / Stats");
 	if (g_bShowFPS)
 	{
