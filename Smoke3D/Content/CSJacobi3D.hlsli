@@ -13,7 +13,7 @@ Texture3D<halfV>	g_roUnknown	: register (t1);
 //--------------------------------------------------------------------------------------
 // Jacobi iteration
 //--------------------------------------------------------------------------------------
-floatV Jacobi(const half2 vf, const uint3 vLoc)
+halfV Jacobi(const min16float2 vf, const uint3 vLoc)
 {
 	halfV fq = vf.x * g_roKnown[vLoc];
 	fq += g_roUnknown[vLoc - uint3(1, 0, 0)];

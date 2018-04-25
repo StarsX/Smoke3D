@@ -7,14 +7,14 @@
 //--------------------------------------------------------------------------------------
 // Constants
 //--------------------------------------------------------------------------------------
-static const float2 g_vRestDen = { 0.8, 1.0 };
+static const min16float2 g_vRestDen = { 0.8, 1.0 };
 
 //--------------------------------------------------------------------------------------
 // Structured Buffers
 //--------------------------------------------------------------------------------------
-RWTexture3D<half3>	g_rwVelocity	: register (u0);
-Texture3D<half3>	g_roVelocity	: register (t0);
-Texture3D<half>		g_roPressure	: register (t1);
+RWTexture3D<min16float3>	g_rwVelocity	: register (u0);
+Texture3D<min16float3>		g_roVelocity	: register (t0);
+Texture3D<min16float>		g_roPressure	: register (t1);
 
 //--------------------------------------------------------------------------------------
 // Projection

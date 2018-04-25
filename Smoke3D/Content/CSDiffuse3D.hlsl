@@ -6,7 +6,7 @@
 // Type definations
 //--------------------------------------------------------------------------------------
 typedef float3	floatV;
-typedef half3	halfV;
+typedef min16float3	halfV;
 
 #include "CSJacobi3D.hlsli"
 
@@ -27,8 +27,8 @@ RWTexture3D<halfV>	g_rwUnknown	: register (u0);
 void main(uint3 DTid : SV_DispatchThreadID)
 {
 	// Jacobi iteration
-	const half fAlpha = 1.0 / (VISCOSITY * g_fDeltaTime);
-	const half fBeta = 6.0 + fAlpha;
-	const half2 vf = { fAlpha, fBeta };
+	const min16float fAlpha = 1.0 / (VISCOSITY * min16float(g_fDeltaTime));
+	const min16float fBeta = 6.0 + fAlpha;
+	const min16float2 vf = { fAlpha, fBeta };
 	g_rwUnknown[DTid] = Jacobi(vf, DTid);
 }
