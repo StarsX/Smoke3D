@@ -98,14 +98,18 @@ void Texture2D::CreateUAV(const uint32_t uArraySize, const uint8_t uMips)
 {
 	const auto pTexture = m_pTexture.Get();
 
-	// Setup the description of the unordered access view.
-	const auto uavDesc = CD3D11_UNORDERED_ACCESS_VIEW_DESC(pTexture, uArraySize > 1 ?
-		D3D11_UAV_DIMENSION_TEXTURE2DARRAY : D3D11_UAV_DIMENSION_TEXTURE2D);
-
-	// Create the unordered access view.
-	VEC_ALLOC(m_vpUAVs, uMips);
+	auto uMip = 0ui8;
+	VEC_ALLOC(m_vpUAVs, max(uMips, 1));
 	for (auto &pUAV : m_vpUAVs)
+	{
+		// Setup the description of the unordered access view.
+		const auto uavDesc = CD3D11_UNORDERED_ACCESS_VIEW_DESC(pTexture, uArraySize > 1 ?
+			D3D11_UAV_DIMENSION_TEXTURE2DARRAY : D3D11_UAV_DIMENSION_TEXTURE2D,
+			DXGI_FORMAT_UNKNOWN, uMip++);
+
+		// Create the unordered access view.
 		ThrowIfFailed(m_pDXDevice->CreateUnorderedAccessView(pTexture, &uavDesc, &pUAV));
+	}
 }
 
 const CPDXTexture2D &Texture2D::GetBuffer() const
@@ -138,21 +142,21 @@ void RenderTarget::Create(const uint32_t uWidth, const uint32_t uHeight, const u
 	create(uWidth, uHeight, uArraySize, eFormat, uSamples, uMips, bUAV);
 	const auto pTexture = m_pTexture.Get();
 
-	const auto uNumMips = max(uMips, 1);
+	auto uMip = 0ui8, uSlice = 0ui8;
 	VEC_ALLOC(m_vvpRTVs, uArraySize);
-	for (auto i = 0ui8; i < uArraySize; ++i)
+	for (auto &vpRTVs : m_vvpRTVs)
 	{
-		VEC_ALLOC(m_vvpRTVs[i], uNumMips);
-		for (auto j = 0ui8; j < uNumMips; ++j)
+		VEC_ALLOC(vpRTVs, max(uMips, 1));
+		for (auto &pRTV : vpRTVs)
 		{
 			// Setup the description of the render target view.
 			const auto rtvDesc = CD3D11_RENDER_TARGET_VIEW_DESC(pTexture, uArraySize > 1 ?
 				(uSamples > 1 ? D3D11_RTV_DIMENSION_TEXTURE2DMSARRAY : D3D11_RTV_DIMENSION_TEXTURE2DARRAY) :
 				(uSamples > 1 ? D3D11_RTV_DIMENSION_TEXTURE2DMS : D3D11_RTV_DIMENSION_TEXTURE2D),
-				DXGI_FORMAT_UNKNOWN, j, i, 1);
+				DXGI_FORMAT_UNKNOWN, uMip++, uSlice++, 1);
 
 			// Create the render target view.
-			ThrowIfFailed(m_pDXDevice->CreateRenderTargetView(pTexture, &rtvDesc, &m_vvpRTVs[i][j]));
+			ThrowIfFailed(m_pDXDevice->CreateRenderTargetView(pTexture, &rtvDesc, &pRTV));
 		}
 	}
 }
@@ -169,19 +173,20 @@ void RenderTarget::CreateArray(const uint32_t uWidth, const uint32_t uHeight, co
 	create(uWidth, uHeight, uArraySize, eFormat, uSamples, uMips, bUAV);
 	const auto pTexture = m_pTexture.Get();
 
-	const auto uNumMips = max(uMips, 1);
 	VEC_ALLOC(m_vvpRTVs, 1);
-	VEC_ALLOC(m_vvpRTVs[0], uNumMips);
-	for (auto i = 0ui8; i < uNumMips; ++i)
+	VEC_ALLOC(m_vvpRTVs[0], max(uMips, 1));
+
+	auto uMip = 0ui8;
+	for (auto &pRTV : m_vvpRTVs[0])
 	{
 		// Setup the description of the render target view.
 		const auto rtvDesc = CD3D11_RENDER_TARGET_VIEW_DESC(pTexture, uArraySize > 1 ?
 			(uSamples > 1 ? D3D11_RTV_DIMENSION_TEXTURE2DMSARRAY : D3D11_RTV_DIMENSION_TEXTURE2DARRAY) :
 			(uSamples > 1 ? D3D11_RTV_DIMENSION_TEXTURE2DMS : D3D11_RTV_DIMENSION_TEXTURE2D),
-			DXGI_FORMAT_UNKNOWN, i);
+			DXGI_FORMAT_UNKNOWN, uMip++);
 
 		// Create the render target view.
-		ThrowIfFailed(m_pDXDevice->CreateRenderTargetView(pTexture, &rtvDesc, &m_vvpRTVs[0][i]));
+		ThrowIfFailed(m_pDXDevice->CreateRenderTargetView(pTexture, &rtvDesc, &pRTV));
 	}
 }
 
@@ -319,6 +324,7 @@ void DepthStencil::Create(const uint32_t uWidth, const uint32_t uHeight, const u
 	const auto uNumMips = max(uMips, 1);
 	VEC_ALLOC(m_vpDSVs, uNumMips);
 	VEC_ALLOC(m_vpDSVROs, uNumMips);
+
 	for (auto i = 0ui8; i < uNumMips; ++i)
 	{
 		// Setup the description of the depth stencil view.
@@ -412,13 +418,17 @@ void Texture3D::Create(const uint32_t uWidth, const uint32_t uHeight, const uint
 	// Create UAV
 	if (bUAV)
 	{
-		// Setup the description of the unordered access view.
-		const auto uavDesc = CD3D11_UNORDERED_ACCESS_VIEW_DESC(pTexture);
-
-		// Create the unordered access view.
-		VEC_ALLOC(m_vpUAVs, uMips);
+		auto uMip = 0ui8;
+		VEC_ALLOC(m_vpUAVs, max(uMips, 1));
 		for (auto &pUAV : m_vpUAVs)
+		{
+			// Setup the description of the unordered access view.
+			const auto uWSize = uDepth >> uMip;
+			const auto uavDesc = CD3D11_UNORDERED_ACCESS_VIEW_DESC(pTexture, DXGI_FORMAT_UNKNOWN, uMip++, 0, uWSize);
+
+			// Create the unordered access view.
 			ThrowIfFailed(m_pDXDevice->CreateUnorderedAccessView(pTexture, &uavDesc, &pUAV));
+		}
 	}
 }
 

@@ -38,6 +38,7 @@ namespace XSDX
 		const CPDXBlendState		&AlphaToCoverage();
 		const CPDXBlendState		&Accumulative();
 		const CPDXBlendState		&AutoAlphaBlend();
+		const CPDXBlendState		&BlendAlphaZero();
 		const CPDXBlendState		&Multiplied();
 		const CPDXBlendState		&WeightBlend();
 		const CPDXBlendState		&SelectMin();
@@ -75,6 +76,7 @@ namespace XSDX
 		CPDXBlendState				m_pAlphaToCoverage;
 		CPDXBlendState				m_pAccumulative;
 		CPDXBlendState				m_pAutoAlphaBlend;
+		CPDXBlendState				m_pBlendAlphaZero;
 		CPDXBlendState				m_pMultiplied;
 		CPDXBlendState				m_pWeightBlend;
 		CPDXBlendState				m_pSelectMin;

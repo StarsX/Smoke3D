@@ -188,6 +188,33 @@ const CPDXBlendState &State::AutoAlphaBlend()
 	return m_pAutoAlphaBlend;
 }
 
+const CPDXBlendState &State::BlendAlphaZero()
+{
+	if (!m_pBlendAlphaZero)
+	{
+		const auto desc = D3D11_BLEND_DESC
+		{
+			false,								// AlphaToCoverageEnable
+			false,								// IndependentBlendEnable
+			D3D11_RENDER_TARGET_BLEND_DESC
+			{
+				true,							// BlendEnable
+				D3D11_BLEND_SRC_ALPHA,			// SrcBlend
+				D3D11_BLEND_INV_SRC_ALPHA,		// DestBlend
+				D3D11_BLEND_OP_ADD,				// BlendOp
+				D3D11_BLEND_ZERO,				// SrcBlendAlpha
+				D3D11_BLEND_ZERO,				// DestBlendAlpha
+				D3D11_BLEND_OP_ADD,				// BlendOpAlpha
+				D3D11_COLOR_WRITE_ENABLE_ALL	// RenderTargetWriteMask
+			}
+		};
+
+		ThrowIfFailed(m_pDXDevice->CreateBlendState(&desc, &m_pBlendAlphaZero));
+	}
+
+	return m_pBlendAlphaZero;
+}
+
 const CPDXBlendState &State::Multiplied()
 {
 	if (!m_pMultiplied)
