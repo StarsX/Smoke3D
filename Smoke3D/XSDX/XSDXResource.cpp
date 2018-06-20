@@ -2,28 +2,28 @@
 // By Stars XU Tianchen
 //--------------------------------------------------------------------------------------
 
-#include "XSDXBuffer.h"
+#include "XSDXResource.h"
 
 using namespace DirectX;
 using namespace DX;
 using namespace XSDX;
 
-Buffer::Buffer(const CPDXDevice &pDXDevice) :
+Resource::Resource(const CPDXDevice &pDXDevice) :
 	m_pSRV(nullptr),
 	m_pDXDevice(pDXDevice)
 {
 }
 
-Buffer::~Buffer(void)
+Resource::~Resource(void)
 {
 }
 
-const CPDXShaderResourceView &Buffer::GetSRV() const
+const CPDXShaderResourceView &Resource::GetSRV() const
 {
 	return m_pSRV;
 }
 
-void Buffer::CreateReadBuffer(const CPDXDevice &pDXDevice, CPDXBuffer &pDstBuffer, const CPDXBuffer &pSrcBuffer)
+void Resource::CreateReadBuffer(const CPDXDevice &pDXDevice, CPDXBuffer &pDstBuffer, const CPDXBuffer &pSrcBuffer)
 {
 	auto desc = D3D11_BUFFER_DESC();
 	pSrcBuffer->GetDesc(&desc);
@@ -40,7 +40,7 @@ void Buffer::CreateReadBuffer(const CPDXDevice &pDXDevice, CPDXBuffer &pDstBuffe
 //--------------------------------------------------------------------------------------
 
 Texture2D::Texture2D(const CPDXDevice &pDXDevice) :
-	Buffer(pDXDevice),
+	Resource(pDXDevice),
 	m_pTexture(nullptr),
 	m_vpUAVs(0)
 {
@@ -112,7 +112,7 @@ void Texture2D::CreateUAV(const uint32_t uArraySize, const uint8_t uMips)
 	}
 }
 
-const CPDXTexture2D &Texture2D::GetBuffer() const
+const CPDXTexture2D &Texture2D::GetTexture() const
 {
 	return m_pTexture;
 }
@@ -142,18 +142,18 @@ void RenderTarget::Create(const uint32_t uWidth, const uint32_t uHeight, const u
 	create(uWidth, uHeight, uArraySize, eFormat, uSamples, uMips, bUAV);
 	const auto pTexture = m_pTexture.Get();
 
-	auto uMip = 0ui8, uSlice = 0ui8;
 	VEC_ALLOC(m_vvpRTVs, uArraySize);
-	for (auto &vpRTVs : m_vvpRTVs)
+	for (auto i = 0ui8; i < uArraySize; ++i)
 	{
-		VEC_ALLOC(vpRTVs, max(uMips, 1));
-		for (auto &pRTV : vpRTVs)
+		auto uMip = 0ui8;
+		VEC_ALLOC(m_vvpRTVs[i], max(uMips, 1));
+		for (auto &pRTV : m_vvpRTVs[i])
 		{
 			// Setup the description of the render target view.
 			const auto rtvDesc = CD3D11_RENDER_TARGET_VIEW_DESC(pTexture, uArraySize > 1 ?
 				(uSamples > 1 ? D3D11_RTV_DIMENSION_TEXTURE2DMSARRAY : D3D11_RTV_DIMENSION_TEXTURE2DARRAY) :
 				(uSamples > 1 ? D3D11_RTV_DIMENSION_TEXTURE2DMS : D3D11_RTV_DIMENSION_TEXTURE2D),
-				DXGI_FORMAT_UNKNOWN, uMip++, uSlice++, 1);
+				DXGI_FORMAT_UNKNOWN, uMip++, i, 1);
 
 			// Create the render target view.
 			ThrowIfFailed(m_pDXDevice->CreateRenderTargetView(pTexture, &rtvDesc, &pRTV));
@@ -377,7 +377,7 @@ const uint8_t DepthStencil::GetNumMips() const
 //--------------------------------------------------------------------------------------
 
 Texture3D::Texture3D(const CPDXDevice &pDXDevice) :
-	Buffer(pDXDevice),
+	Resource(pDXDevice),
 	m_pTexture(nullptr),
 	m_vpUAVs(0)
 {
@@ -432,7 +432,7 @@ void Texture3D::Create(const uint32_t uWidth, const uint32_t uHeight, const uint
 	}
 }
 
-const CPDXTexture3D &::Texture3D::GetBuffer() const
+const CPDXTexture3D &::Texture3D::GetTexture() const
 {
 	return m_pTexture;
 }
@@ -447,7 +447,7 @@ const CPDXUnorderedAccessView &::Texture3D::GetUAV(const uint8_t i) const
 //--------------------------------------------------------------------------------------
 
 RawBuffer::RawBuffer(const CPDXDevice &pDXDevice) :
-	Buffer(pDXDevice),
+	Resource(pDXDevice),
 	m_pBuffer(nullptr),
 	m_pUAV(nullptr)
 {

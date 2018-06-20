@@ -10,11 +10,11 @@
 
 namespace XSDX
 {
-	class Buffer
+	class Resource
 	{
 	public:
-		Buffer(const CPDXDevice &pDXDevice);
-		virtual ~Buffer(void);
+		Resource(const CPDXDevice &pDXDevice);
+		virtual ~Resource(void);
 
 		const CPDXShaderResourceView	&GetSRV() const;
 
@@ -26,14 +26,14 @@ namespace XSDX
 		CPDXDevice						m_pDXDevice;
 	};
 
-	using upBuffer = std::unique_ptr<Buffer>;
-	using spBuffer = std::shared_ptr<Buffer>;
-	using vuBuffer = std::vector<upBuffer>;
-	using vpBuffer = std::vector<spBuffer>;
+	using upResource = std::unique_ptr<Resource>;
+	using spResource = std::shared_ptr<Resource>;
+	using vuResource = std::vector<upResource>;
+	using vpResource = std::vector<spResource>;
 
 
 	class Texture2D :
-		public Buffer
+		public Resource
 	{
 	public:
 		Texture2D(const CPDXDevice &pDXDevice);
@@ -53,7 +53,7 @@ namespace XSDX
 		void CreateSRV(const uint32_t uArraySize, const uint8_t uSamples = 1);
 		void CreateUAV(const uint32_t uArraySize, const uint8_t uMips = 1);
 
-		const CPDXTexture2D				&GetBuffer() const;
+		const CPDXTexture2D				&GetTexture() const;
 		const CPDXUnorderedAccessView	&GetUAV(const uint8_t i = 0) const;
 	protected:
 		CPDXTexture2D					m_pTexture;
@@ -127,7 +127,7 @@ namespace XSDX
 
 
 	class Texture3D :
-		public Buffer
+		public Resource
 	{
 	public:
 		Texture3D(const CPDXDevice &pDXDevice);
@@ -138,7 +138,7 @@ namespace XSDX
 			const lpcvoid pInitialData = nullptr,
 			const uint8_t uStride = sizeof(float));
 
-		const CPDXTexture3D				&GetBuffer() const;
+		const CPDXTexture3D				&GetTexture() const;
 		const CPDXUnorderedAccessView	&GetUAV(const uint8_t i = 0) const;
 	protected:
 		CPDXTexture3D					m_pTexture;
@@ -152,7 +152,7 @@ namespace XSDX
 
 
 	class RawBuffer :
-		public Buffer
+		public Resource
 	{
 	public:
 		RawBuffer(const CPDXDevice &pDXDevice);
@@ -178,7 +178,7 @@ namespace XSDX
 
 
 	class TypedBuffer :
-	public RawBuffer
+		public RawBuffer
 	{
 	public:
 		TypedBuffer(const CPDXDevice &pDXDevice);

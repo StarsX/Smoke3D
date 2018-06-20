@@ -42,9 +42,6 @@
     <ClInclude Include="Smoke3D.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="XSDX\XSDXBuffer.h">
-      <Filter>XSDX\Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="XSDX\XSDXShader.h">
       <Filter>XSDX\Header Files</Filter>
     </ClInclude>
@@ -78,13 +75,13 @@
     <ClInclude Include="stdafx.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="XSDX\XSDXResource.h">
+      <Filter>XSDX\Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Smoke3D.cpp">
       <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="XSDX\XSDXBuffer.cpp">
-      <Filter>XSDX\Source Files</Filter>
     </ClCompile>
     <ClCompile Include="XSDX\XSDXShader.cpp">
       <Filter>XSDX\Source Files</Filter>
@@ -100,6 +97,9 @@
     </ClCompile>
     <ClCompile Include="stdafx.cpp">
       <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="XSDX\XSDXResource.cpp">
+      <Filter>XSDX\Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
