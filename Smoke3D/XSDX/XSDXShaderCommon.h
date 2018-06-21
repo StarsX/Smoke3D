@@ -105,6 +105,11 @@ namespace XSDX
 	};
 
 	// Compute shaders
+	enum ModelComputeShader : uint32_t
+	{
+		CS_SKINNING
+	};
+
 	enum PostComputeShader	: uint32_t
 	{
 		CS_LUM_ADAPT
@@ -117,9 +122,6 @@ namespace XSDX
 	static uint8_t			g_uVSDepth		(VS_DEPTH);
 	static uint8_t			g_uVSSkinning	(VS_SKINNING);
 	static uint8_t			g_uVSBound		(VS_BOUND);
-
-	// Geometry shaders
-	static uint8_t			g_uGSSkinning	(VS_SKINNING);
 
 	// Pixel shaders
 	static uint8_t			g_uPSShade		(PS_DEFERRED_SHADE);
@@ -138,6 +140,7 @@ namespace XSDX
 	static uint8_t			g_uPSBound		(PS_BOUND);
 
 	// Compute shaders
+	static uint8_t			g_uCSSkinning	(CS_SKINNING);
 	static uint8_t			g_uCSLumAdapt	(CS_LUM_ADAPT);
 #endif
 
