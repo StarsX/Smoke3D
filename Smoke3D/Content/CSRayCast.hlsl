@@ -38,7 +38,7 @@ static const min16float g_fLStepScale = g_fMaxDist / NUM_LIGHT_SAMPLES;
 //--------------------------------------------------------------------------------------
 // Textures
 //--------------------------------------------------------------------------------------
-Texture3D<min16float>		g_roDensity	: register (t0);
+Texture3D<min16float>		g_txDensity	: register (t0);
 
 //--------------------------------------------------------------------------------------
 // RW textures
@@ -111,7 +111,7 @@ min16float GetSample(const float3 vTex)
 #elif defined(CUBE_TEST)
 	return 1.0;
 #else
-	return min(g_roDensity.SampleLevel(g_smpLinear, vTex, 0), 16.0);
+	return min(g_txDensity.SampleLevel(g_smpLinear, vTex, 0), 16.0);
 #endif
 }
 

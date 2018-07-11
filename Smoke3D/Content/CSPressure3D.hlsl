@@ -4,6 +4,8 @@
 
 #include "CSGaussSeidel3D.hlsli"
 
+#define PRESS_ITERATION	48
+
 //--------------------------------------------------------------------------------------
 // Poisson pressure
 //--------------------------------------------------------------------------------------
@@ -13,12 +15,13 @@ void main(uint3 DTid : SV_DispatchThreadID)
 	const min16float2 vf = { -1.0, 6.0 };
 
 	// Unordered Gauss-Seidel iteration
-	for (uint i = 0; i < 1024; ++i)
+	[unroll]
+	for (uint i = 0; i < PRESS_ITERATION; ++i)
 	{
 		const min16float fPressPrev = g_rwUnknown[DTid];
 		const min16float fPress = GaussSeidel(vf, DTid);
-		
-		if (abs(fPress - fPressPrev) < 0.0000001) return;
+
 		g_rwUnknown[DTid] = fPress;
+		DeviceMemoryBarrierWithGroupSync();
 	}
 }

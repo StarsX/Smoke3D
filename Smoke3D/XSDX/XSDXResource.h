@@ -50,14 +50,19 @@ namespace XSDX
 			const uint8_t uMips = 1,
 			const lpcvoid pInitialData = nullptr,
 			const uint8_t uStride = sizeof(float));
-		void CreateSRV(const uint32_t uArraySize, const uint8_t uSamples = 1);
+		void CreateSRV(const uint32_t uArraySize, const uint8_t uSamples = 1, const uint8_t uMips = 1);
 		void CreateUAV(const uint32_t uArraySize, const uint8_t uMips = 1);
+		void CreateSubSRVs();
 
 		const CPDXTexture2D				&GetTexture() const;
 		const CPDXUnorderedAccessView	&GetUAV(const uint8_t i = 0) const;
+		const CPDXShaderResourceView	&GetSRVLevel(const uint8_t i) const;
+		const CPDXShaderResourceView	&GetSubSRV(const uint8_t i) const;
 	protected:
 		CPDXTexture2D					m_pTexture;
 		vCPDXUAV						m_vpUAVs;
+		vCPDXSRV						m_vpSRVs;
+		vCPDXSRV						m_vpSubSRVs;
 	};
 
 	using upTexture2D = std::unique_ptr<Texture2D>;
@@ -137,12 +142,17 @@ namespace XSDX
 			const bool bDyn = false, const uint8_t uMips = 1,
 			const lpcvoid pInitialData = nullptr,
 			const uint8_t uStride = sizeof(float));
+		void CreateSubSRVs();
 
 		const CPDXTexture3D				&GetTexture() const;
 		const CPDXUnorderedAccessView	&GetUAV(const uint8_t i = 0) const;
+		const CPDXShaderResourceView	&GetSRVLevel(const uint8_t i) const;
+		const CPDXShaderResourceView	&GetSubSRV(const uint8_t i) const;
 	protected:
 		CPDXTexture3D					m_pTexture;
 		vCPDXUAV						m_vpUAVs;
+		vCPDXSRV						m_vpSRVs;
+		vCPDXSRV						m_vpSubSRVs;
 	};
 
 	using upTexture3D = std::unique_ptr<Texture3D>;

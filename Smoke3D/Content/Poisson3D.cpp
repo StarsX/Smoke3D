@@ -92,8 +92,8 @@ void Poisson3D::SolvePoisson(const uint8_t uIteration)
 	else gaussSeidel();
 
 	// Unset
-	const auto pSRVs = array<LPDXShaderResourceView, 2>{ { nullptr, nullptr } };
-	m_pDXContext->CSSetShaderResources(m_uSRField, static_cast<uint32_t>(pSRVs.size()), pSRVs.data());
+	const auto vpSRVs = vLPDXSRV(2, nullptr);
+	m_pDXContext->CSSetShaderResources(m_uSRField, static_cast<uint32_t>(vpSRVs.size()), vpSRVs.data());
 	m_pDXContext->CSSetUnorderedAccessViews(m_uUASlot, 1, &g_pNullUAV, &g_uNullUint);
 
 	// Swap buffers
@@ -103,10 +103,9 @@ void Poisson3D::SolvePoisson(const uint8_t uIteration)
 void Poisson3D::Advect(const CPDXShaderResourceView &srvSource)
 {
 	// Setup
-	const auto pSRVs = array<LPDXShaderResourceView, 2>
-	{ { m_pSrcKnown->GetSRV().Get(), srvSource.Get() } };
+	const auto pSRVs = { m_pSrcKnown->GetSRV().Get(), srvSource.Get() };
 	m_pDXContext->CSSetUnorderedAccessViews(m_uUASlot, 1, m_pDstUnknown->GetUAV().GetAddressOf(), &g_uNullUint);
-	m_pDXContext->CSSetShaderResources(m_uSRField, static_cast<uint32_t>(pSRVs.size()), pSRVs.data());
+	m_pDXContext->CSSetShaderResources(m_uSRField, static_cast<uint32_t>(pSRVs.size()), pSRVs.begin());
 	m_pDXContext->CSSetSamplers(m_uSmpLinearClamp, 1, m_pState->LinearClamp().GetAddressOf());
 
 	// Compute Divergence
@@ -114,8 +113,8 @@ void Poisson3D::Advect(const CPDXShaderResourceView &srvSource)
 	m_pDXContext->Dispatch(m_vThreadGroupSize.x, m_vThreadGroupSize.y, m_vThreadGroupSize.z);
 
 	// Unset
-	const auto pNullSRVs = array<LPDXShaderResourceView, pSRVs.size()>{ { nullptr, nullptr } };
-	m_pDXContext->CSSetShaderResources(m_uSRField, static_cast<uint32_t>(pNullSRVs.size()), pNullSRVs.data());
+	const auto vpNullSRVs = vLPDXSRV(pSRVs.size(), nullptr);
+	m_pDXContext->CSSetShaderResources(m_uSRField, static_cast<uint32_t>(vpNullSRVs.size()), vpNullSRVs.data());
 	m_pDXContext->CSSetUnorderedAccessViews(m_uUASlot, 1, &g_pNullUAV, &g_uNullUint);
 
 	// Swap buffers

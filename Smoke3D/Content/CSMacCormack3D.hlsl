@@ -14,10 +14,10 @@ static const min16float g_fDecay = 0.95;
 //--------------------------------------------------------------------------------------
 RWTexture3D<min16float3>	g_rwVelocity	: register (u0);
 RWTexture3D<min16float>		g_rwDensity		: register (u1);
-Texture3D<min16float3>		g_roPhiVel		: register (t0);
-Texture3D<min16float>		g_roPhiDen		: register (t1);
-Texture3D<min16float3>		g_roPhiHatVel	: register (t2);
-Texture3D<min16float>		g_roPhiHatDen	: register (t3);
+Texture3D<min16float3>		g_txPhiVel		: register (t0);
+Texture3D<min16float>		g_txPhiDen		: register (t1);
+Texture3D<min16float3>		g_txPhiHatVel	: register (t2);
+Texture3D<min16float>		g_txPhiHatDen	: register (t3);
 
 //--------------------------------------------------------------------------------------
 // Texture samplers
@@ -33,7 +33,7 @@ SamplerState		g_smpPoint		: register (s2);
 void main(uint3 DTid : SV_DispatchThreadID)
 {
 	// Velocity tracing
-	const float3 vU = g_roPhiVel[DTid];
+	const float3 vU = g_txPhiVel[DTid];
 	const float3 vDisp = vU * g_fDeltaTime;
 	const float3 vTex = (DTid + 0.5) * g_vTexel - vDisp;
 	const float3 vTexTx = floor(DTid + 1.0 - vDisp / g_vTexel) * g_vTexel;
@@ -55,8 +55,8 @@ void main(uint3 DTid : SV_DispatchThreadID)
 	min16float fPhiN[8];
 	for (uint i = 0; i < 8; ++i)
 	{
-		vPhiN[i] = g_roPhiVel.SampleLevel(g_smpPoint, vTexN[i], 0);
-		fPhiN[i] = g_roPhiDen.SampleLevel(g_smpPoint, vTexN[i], 0);
+		vPhiN[i] = g_txPhiVel.SampleLevel(g_smpPoint, vTexN[i], 0);
+		fPhiN[i] = g_txPhiDen.SampleLevel(g_smpPoint, vTexN[i], 0);
 	}
 
 	min16float3 vPhiMin = min(min(min(vPhiN[0], vPhiN[1]), vPhiN[2]), vPhiN[3]);
@@ -69,11 +69,11 @@ void main(uint3 DTid : SV_DispatchThreadID)
 	min16float fPhiMax = max(max(max(fPhiN[0], fPhiN[1]), fPhiN[2]), fPhiN[3]);
 	fPhiMax = max(max(max(max(fPhiMax, fPhiN[4]), fPhiN[5]), fPhiN[6]), fPhiN[7]);
 
-	const min16float3 vPhiAdv = g_roPhiVel.SampleLevel(g_smpLinear, vTex, 0);
-	const min16float fPhiAdv = g_roPhiDen.SampleLevel(g_smpLinear, vTex, 0);
+	const min16float3 vPhiAdv = g_txPhiVel.SampleLevel(g_smpLinear, vTex, 0);
+	const min16float fPhiAdv = g_txPhiDen.SampleLevel(g_smpLinear, vTex, 0);
 
-	const min16float3 vVelocity = vPhiAdv + 0.5 * (g_roPhiVel[DTid] - g_roPhiHatVel[DTid]);
-	const min16float fDensity = fPhiAdv + 0.5 * (g_roPhiDen[DTid] - g_roPhiHatDen[DTid]);
+	const min16float3 vVelocity = vPhiAdv + 0.5 * (g_txPhiVel[DTid] - g_txPhiHatVel[DTid]);
+	const min16float fDensity = fPhiAdv + 0.5 * (g_txPhiDen[DTid] - g_txPhiHatDen[DTid]);
 
 	// Update velocity and density
 	g_rwVelocity[DTid] = clamp(vVelocity, vPhiMin, vPhiMax);

@@ -8,7 +8,7 @@
 // Structured Buffers
 //--------------------------------------------------------------------------------------
 RWTexture3D<min16float3>	g_rwVelocity	: register (u0);
-Texture3D<min16float3>		g_roVelocity	: register (t0);
+Texture3D<min16float3>		g_txVelocity	: register (t0);
 
 //--------------------------------------------------------------------------------------
 // Boundary process
@@ -17,7 +17,7 @@ Texture3D<min16float3>		g_roVelocity	: register (t0);
 void main(uint3 DTid : SV_DispatchThreadID)
 {
 	uint3 vDim;
-	g_roVelocity.GetDimensions(vDim.x, vDim.y, vDim.z);
+	g_txVelocity.GetDimensions(vDim.x, vDim.y, vDim.z);
 	
 	// Current location
 	int3 vLoc = DTid;
@@ -31,6 +31,6 @@ void main(uint3 DTid : SV_DispatchThreadID)
 	vLoc += vOffset;
 
 	if (vOffset.x || vOffset.y || vOffset.z)
-		g_rwVelocity[DTid] = -g_roVelocity[vLoc];
-	else g_rwVelocity[DTid] = g_roVelocity[DTid];
+		g_rwVelocity[DTid] = -g_txVelocity[vLoc];
+	else g_rwVelocity[DTid] = g_txVelocity[DTid];
 }

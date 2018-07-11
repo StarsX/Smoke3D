@@ -9,8 +9,8 @@
 //--------------------------------------------------------------------------------------
 RWTexture3D<min16float3>	g_rwVelocity	: register (u0);
 RWTexture3D<min16float>		g_rwDensity		: register (u1);
-Texture3D<min16float3>		g_roVelocity	: register (t0);
-Texture3D<min16float>		g_roDensity		: register (t1);
+Texture3D<min16float3>		g_txVelocity	: register (t0);
+Texture3D<min16float>		g_txDensity		: register (t1);
 
 //--------------------------------------------------------------------------------------
 // Gaussian distribution
@@ -43,6 +43,6 @@ void main(uint3 DTid : SV_DispatchThreadID)
 	const min16float fDens = min16float(g_fDens * length(g_vForce));
 	const min16float3 vForce = min16float3(g_vForce) * fBasis;
 
-	g_rwVelocity[DTid] = g_roVelocity[DTid] + vForce * min16float(g_fDeltaTime);
-	g_rwDensity[DTid] = g_roDensity[DTid] + fDens * fBasis;
+	g_rwVelocity[DTid] = g_txVelocity[DTid] + vForce * min16float(g_fDeltaTime);
+	g_rwDensity[DTid] = g_txDensity[DTid] + fDens * fBasis;
 }

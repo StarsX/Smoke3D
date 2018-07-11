@@ -31,6 +31,14 @@ public:
 	void Render(const XSDX::CPDXUnorderedAccessView &pUAVDst);
 
 protected:
+	enum AdvectionMode
+	{
+		SEMI_LAGRANGE,
+		MAC_CORMACK,
+
+		NUM_ADVECT_MODE
+	};
+
 	void createConstBuffers();
 	void advect(const float fDeltaTime, const bool bMacCormack);
 	void advect(const float fDeltaTime, const XSDX::CPDXShaderResourceView &pSRVVelocity);
@@ -63,7 +71,7 @@ protected:
 	XSDX::spShader		m_pShader;
 	XSDX::spState		m_pState;
 
-	XSDX::CPDXBuffer	m_pCBImmutables[2];
+	XSDX::CPDXBuffer	m_pCBImmutables[NUM_ADVECT_MODE];
 	XSDX::CPDXBuffer	m_pCBPerFrame;
 
 	XSDX::CPDXDevice	m_pDXDevice;

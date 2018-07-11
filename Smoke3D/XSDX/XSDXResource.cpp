@@ -42,7 +42,9 @@ void Resource::CreateReadBuffer(const CPDXDevice &pDXDevice, CPDXBuffer &pDstBuf
 Texture2D::Texture2D(const CPDXDevice &pDXDevice) :
 	Resource(pDXDevice),
 	m_pTexture(nullptr),
-	m_vpUAVs(0)
+	m_vpUAVs(0),
+	m_vpSRVs(0),
+	m_vpSubSRVs(0)
 {
 }
 
@@ -68,7 +70,7 @@ void Texture2D::Create(const uint32_t uWidth, const uint32_t uHeight,
 	else ThrowIfFailed(m_pDXDevice->CreateTexture2D(&textureDesc, nullptr, &m_pTexture));
 
 	// Create SRV
-	if (bSRV) CreateSRV(uArraySize);
+	if (bSRV) CreateSRV(uArraySize, 1, uMips);
 
 	// Create UAV
 	if (bUAV) CreateUAV(uArraySize, uMips);
@@ -81,7 +83,7 @@ void Texture2D::Create(const uint32_t uWidth, const uint32_t uHeight, const DXGI
 	Create(uWidth, uHeight, 1, eFormat, bUAV, bSRV, bDyn, uMips, pInitialData, uStride);
 }
 
-void Texture2D::CreateSRV(const uint32_t uArraySize, const uint8_t uSamples)
+void Texture2D::CreateSRV(const uint32_t uArraySize, const uint8_t uSamples, const uint8_t uMips)
 {
 	const auto pTexture = m_pTexture.Get();
 
@@ -92,6 +94,23 @@ void Texture2D::CreateSRV(const uint32_t uArraySize, const uint8_t uSamples)
 
 	// Create the shader resource view.
 	ThrowIfFailed(m_pDXDevice->CreateShaderResourceView(pTexture, &srvDesc, &m_pSRV));
+
+	if (uMips > 1)
+	{
+		auto uMip = 0ui8;
+		VEC_ALLOC(m_vpSRVs, uMips);
+		for (auto &pSRV : m_vpSRVs)
+		{
+			// Setup the description of the shader resource view.
+			const auto srvDesc = CD3D11_SHADER_RESOURCE_VIEW_DESC(pTexture, uArraySize > 1 ?
+				(uSamples > 1 ? D3D11_SRV_DIMENSION_TEXTURE2DMSARRAY : D3D11_SRV_DIMENSION_TEXTURE2DARRAY) :
+				(uSamples > 1 ? D3D11_SRV_DIMENSION_TEXTURE2DMS : D3D11_SRV_DIMENSION_TEXTURE2D),
+				DXGI_FORMAT_UNKNOWN, uMip++, 1);
+
+			// Create the shader resource view.
+			ThrowIfFailed(m_pDXDevice->CreateShaderResourceView(pTexture, &srvDesc, &pSRV));
+		}
+	}
 }
 
 void Texture2D::CreateUAV(const uint32_t uArraySize, const uint8_t uMips)
@@ -112,6 +131,27 @@ void Texture2D::CreateUAV(const uint32_t uArraySize, const uint8_t uMips)
 	}
 }
 
+void Texture2D::CreateSubSRVs()
+{
+	const auto pTexture = m_pTexture.Get();
+	auto texDesc = D3D11_TEXTURE2D_DESC();
+	pTexture->GetDesc(&texDesc);
+
+	auto uMip = 1ui8;
+	VEC_ALLOC(m_vpSubSRVs, max(texDesc.MipLevels, 1) - 1);
+	for (auto &pSRV : m_vpSubSRVs)
+	{
+		// Setup the description of the shader resource view.
+		const auto srvDesc = CD3D11_SHADER_RESOURCE_VIEW_DESC(pTexture, texDesc.ArraySize > 1 ?
+			(texDesc.SampleDesc.Count > 1 ? D3D11_SRV_DIMENSION_TEXTURE2DMSARRAY : D3D11_SRV_DIMENSION_TEXTURE2DARRAY) :
+			(texDesc.SampleDesc.Count > 1 ? D3D11_SRV_DIMENSION_TEXTURE2DMS : D3D11_SRV_DIMENSION_TEXTURE2D),
+			DXGI_FORMAT_UNKNOWN, uMip++);
+
+		// Create the shader resource view.
+		ThrowIfFailed(m_pDXDevice->CreateShaderResourceView(pTexture, &srvDesc, &pSRV));
+	}
+}
+
 const CPDXTexture2D &Texture2D::GetTexture() const
 {
 	return m_pTexture;
@@ -120,6 +160,16 @@ const CPDXTexture2D &Texture2D::GetTexture() const
 const CPDXUnorderedAccessView &Texture2D::GetUAV(const uint8_t i) const
 {
 	return m_vpUAVs[i];
+}
+
+const CPDXShaderResourceView &Texture2D::GetSRVLevel(const uint8_t i) const
+{
+	return m_vpSRVs[i];
+}
+
+const CPDXShaderResourceView &Texture2D::GetSubSRV(const uint8_t i) const
+{
+	return i ? m_vpSubSRVs[i - 1] : m_pSRV;
 }
 
 //--------------------------------------------------------------------------------------
@@ -379,7 +429,9 @@ const uint8_t DepthStencil::GetNumMips() const
 Texture3D::Texture3D(const CPDXDevice &pDXDevice) :
 	Resource(pDXDevice),
 	m_pTexture(nullptr),
-	m_vpUAVs(0)
+	m_vpUAVs(0),
+	m_vpSRVs(0),
+	m_vpSubSRVs(0)
 {
 }
 
@@ -413,6 +465,20 @@ void Texture3D::Create(const uint32_t uWidth, const uint32_t uHeight, const uint
 
 		// Create the shader resource view.
 		ThrowIfFailed(m_pDXDevice->CreateShaderResourceView(pTexture, &srvDesc, &m_pSRV));
+
+		if (uMips > 1)
+		{
+			auto uMip = 0ui8;
+			VEC_ALLOC(m_vpSRVs, uMips);
+			for (auto &pSRV : m_vpSRVs)
+			{
+				// Setup the description of the shader resource view.
+				const auto srvDesc = CD3D11_SHADER_RESOURCE_VIEW_DESC(pTexture, DXGI_FORMAT_UNKNOWN, uMip++, 1);
+
+				// Create the shader resource view.
+				ThrowIfFailed(m_pDXDevice->CreateShaderResourceView(pTexture, &srvDesc, &pSRV));
+			}
+		}
 	}
 
 	// Create UAV
@@ -432,14 +498,42 @@ void Texture3D::Create(const uint32_t uWidth, const uint32_t uHeight, const uint
 	}
 }
 
-const CPDXTexture3D &::Texture3D::GetTexture() const
+void Texture3D::CreateSubSRVs()
+{
+	const auto pTexture = m_pTexture.Get();
+	auto texDesc = D3D11_TEXTURE3D_DESC();
+	pTexture->GetDesc(&texDesc);
+
+	auto uMip = 1ui8;
+	VEC_ALLOC(m_vpSubSRVs, max(texDesc.MipLevels, 1) - 1);
+	for (auto &pSRV : m_vpSubSRVs)
+	{
+		// Setup the description of the shader resource view.
+		const auto srvDesc = CD3D11_SHADER_RESOURCE_VIEW_DESC(pTexture, DXGI_FORMAT_UNKNOWN, uMip++);
+
+		// Create the shader resource view.
+		ThrowIfFailed(m_pDXDevice->CreateShaderResourceView(pTexture, &srvDesc, &pSRV));
+	}
+}
+
+const CPDXTexture3D &Texture3D::GetTexture() const
 {
 	return m_pTexture;
 }
 
-const CPDXUnorderedAccessView &::Texture3D::GetUAV(const uint8_t i) const
+const CPDXUnorderedAccessView &Texture3D::GetUAV(const uint8_t i) const
 {
 	return m_vpUAVs[i];
+}
+
+const CPDXShaderResourceView &Texture3D::GetSRVLevel(const uint8_t i) const
+{
+	return m_vpSRVs[i];
+}
+
+const CPDXShaderResourceView &Texture3D::GetSubSRV(const uint8_t i) const
+{
+	return i ? m_vpSubSRVs[i - 1] : m_pSRV;
 }
 
 //--------------------------------------------------------------------------------------
@@ -474,7 +568,7 @@ void RawBuffer::Create(const uint32_t uByteWidth, const bool bVB, const bool bSO
 
 	if (pInitialData)
 	{
-		const auto bufferInitData = D3D11_SUBRESOURCE_DATA{ pInitialData, 0, 0 };
+		const auto bufferInitData = D3D11_SUBRESOURCE_DATA{ pInitialData };
 		ThrowIfFailed(m_pDXDevice->CreateBuffer(&bufferDesc, &bufferInitData, &m_pBuffer));
 	}
 	else ThrowIfFailed(m_pDXDevice->CreateBuffer(&bufferDesc, nullptr, &m_pBuffer));
