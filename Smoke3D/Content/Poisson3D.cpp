@@ -28,7 +28,7 @@ Poisson3D::Poisson3D(const CPDXDevice &pDXDevice, const spShader &pShader, const
 	m_pDXDevice->GetImmediateContext(&m_pDXContext);
 }
 
-void Poisson3D::Init(const DirectX::XMUINT3 &vSimSize, const uint8_t uStride, const DXGI_FORMAT format)
+void Poisson3D::Init(const XMUINT3 &vSimSize, const uint8_t uStride, const DXGI_FORMAT format)
 {
 	Init(vSimSize.x, vSimSize.y, vSimSize.z, uStride, format);
 }
@@ -44,13 +44,13 @@ void Poisson3D::Init(const uint32_t uWidth, const uint32_t uHeight, const uint32
 	// Create 3D textures
 	m_pSrcKnown = make_shared<Texture3D>(m_pDXDevice);
 	m_pDstUnknown = make_shared<Texture3D>(m_pDXDevice);
-	m_pSrcKnown->Create(uWidth, uHeight, uDepth, format, true, true, false, 1, vData.data(), uStride);
+	m_pSrcKnown->Create(uWidth, uHeight, uDepth, format, D3D11_BIND_SHADER_RESOURCE | D3D11_BIND_UNORDERED_ACCESS, 1, vData.data(), uStride);
 	m_pDstUnknown->Create(uWidth, uHeight, uDepth, format);
 
-	if (format != DXGI_FORMAT_R32_FLOAT && format != DXGI_FORMAT_R16_FLOAT)
+	if (format != DXGI_FORMAT_R32_FLOAT)
 	{
 		m_pSrcUnknown = make_shared<Texture3D>(m_pDXDevice);
-		m_pSrcUnknown->Create(uWidth, uHeight, uDepth, format, true, true, false, 1, vData.data(), uStride);
+		m_pSrcUnknown->Create(uWidth, uHeight, uDepth, format, D3D11_BIND_SHADER_RESOURCE | D3D11_BIND_UNORDERED_ACCESS, 1, vData.data(), uStride);
 	}
 	else m_pSrcUnknown = nullptr;
 

@@ -58,7 +58,7 @@ void Fluid3D::Init(const uint32_t uWidth, const uint32_t uHeight, const uint32_t
 	m_vThreadGroupSize = XMUINT3(uWidth / THREAD_BLOCK_X, uHeight / THREAD_BLOCK_Y, uDepth / THREAD_BLOCK_Z);
 }
 
-void Fluid3D::Simulate(const float fDeltaTime, const DirectX::XMFLOAT4 vForceDens,
+void Fluid3D::Simulate(const float fDeltaTime, const XMFLOAT4 vForceDens,
 	const DirectX::XMFLOAT3 vImLoc, const uint8_t uItVisc, const bool bMacCormack)
 {
 	m_vPerFrames[0] = vForceDens;
@@ -76,7 +76,7 @@ void Fluid3D::Simulate(const float fDeltaTime, const DirectX::XMFLOAT4 vForceDen
 	m_pDXContext->CSSetUnorderedAccessViews(m_uUASlot, static_cast<uint32_t>(vpUAVs.size()), vpUAVs.data(), &g_uNullUint);
 }
 
-void Fluid3D::Render(const XSDX::CPDXUnorderedAccessView &pUAVSwapChain)
+void Fluid3D::Render(const CPDXUnorderedAccessView &pUAVSwapChain)
 {
 	auto pSrc = CPDXResource();
 	auto desc = D3D11_TEXTURE2D_DESC();
@@ -130,7 +130,7 @@ void Fluid3D::advect(const float fDeltaTime, const bool bMacCormack)
 	}
 }
 
-void Fluid3D::advect(const float fDeltaTime, const CPDXShaderResourceView& pSRVVelocity)
+void Fluid3D::advect(const float fDeltaTime, const CPDXShaderResourceView &pSRVVelocity)
 {
 	m_vPerFrames[1].w = fDeltaTime;
 	m_pDXContext->UpdateSubresource(m_pCBPerFrame.Get(), 0, nullptr, m_vPerFrames, 0, 0);
@@ -157,7 +157,7 @@ void Fluid3D::advect(const float fDeltaTime, const CPDXShaderResourceView& pSRVV
 	m_pSrcDensity.swap(m_pDstDensity);
 }
 
-void Fluid3D::macCormack(const float fDeltaTime, const CPDXShaderResourceView& pSRVVelocity)
+void Fluid3D::macCormack(const float fDeltaTime, const CPDXShaderResourceView &pSRVVelocity)
 {
 	m_vPerFrames[1].w = fDeltaTime;
 	m_pDXContext->UpdateSubresource(m_pCBPerFrame.Get(), 0, nullptr, m_vPerFrames, 0, 0);

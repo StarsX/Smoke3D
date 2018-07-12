@@ -52,15 +52,13 @@ Texture2D::~Texture2D()
 {
 }
 
-void Texture2D::Create(const uint32_t uWidth, const uint32_t uHeight,
-	const uint32_t uArraySize, const DXGI_FORMAT eFormat, const bool bUAV,
-	const bool bSRV, const bool bDyn, const uint8_t uMips,
-	const lpcvoid pInitialData, const uint8_t uStride)
+void Texture2D::Create(const uint32_t uWidth, const uint32_t uHeight, const uint32_t uArraySize,
+	const DXGI_FORMAT eFormat, const uint8_t uBindFlags, const uint8_t uMips,
+	const lpcvoid pInitialData, const uint8_t uStride, const D3D11_USAGE eUsage)
 {
 	// Setup the texture description.
-	const auto textureDesc = CD3D11_TEXTURE2D_DESC(eFormat, uWidth, uHeight, uArraySize,
-		uMips, D3D11_BIND_SHADER_RESOURCE | (bUAV ? D3D11_BIND_UNORDERED_ACCESS : 0),
-		bDyn ? D3D11_USAGE_DYNAMIC : D3D11_USAGE_DEFAULT, bDyn ? D3D11_CPU_ACCESS_WRITE : 0);
+	const auto textureDesc = CD3D11_TEXTURE2D_DESC(eFormat, uWidth, uHeight, uArraySize, uMips,
+		uBindFlags, eUsage, eUsage == D3D11_USAGE_DYNAMIC ? D3D11_CPU_ACCESS_WRITE : 0);
 
 	if (pInitialData)
 	{
@@ -70,17 +68,17 @@ void Texture2D::Create(const uint32_t uWidth, const uint32_t uHeight,
 	else ThrowIfFailed(m_pDXDevice->CreateTexture2D(&textureDesc, nullptr, &m_pTexture));
 
 	// Create SRV
-	if (bSRV) CreateSRV(uArraySize, 1, uMips);
+	if (uBindFlags & D3D11_BIND_SHADER_RESOURCE) CreateSRV(uArraySize, 1, uMips);
 
 	// Create UAV
-	if (bUAV) CreateUAV(uArraySize, uMips);
+	if (uBindFlags & D3D11_BIND_UNORDERED_ACCESS) CreateUAV(uArraySize, uMips);
 }
 
 void Texture2D::Create(const uint32_t uWidth, const uint32_t uHeight, const DXGI_FORMAT eFormat,
-	const bool bUAV, const bool bSRV, const bool bDyn, const uint8_t uMips,
-	const lpcvoid pInitialData, const uint8_t uStride)
+	const uint8_t uBindFlags, const uint8_t uMips, const lpcvoid pInitialData,
+	const uint8_t uStride, const D3D11_USAGE eUsage)
 {
-	Create(uWidth, uHeight, 1, eFormat, bUAV, bSRV, bDyn, uMips, pInitialData, uStride);
+	Create(uWidth, uHeight, 1, eFormat, uBindFlags, uMips, pInitialData, uStride, eUsage);
 }
 
 void Texture2D::CreateSRV(const uint32_t uArraySize, const uint8_t uSamples, const uint8_t uMips)
@@ -187,9 +185,9 @@ RenderTarget::~RenderTarget()
 }
 
 void RenderTarget::Create(const uint32_t uWidth, const uint32_t uHeight, const uint32_t uArraySize,
-	const DXGI_FORMAT eFormat, const uint8_t uSamples, const uint8_t uMips, const bool bUAV)
+	const DXGI_FORMAT eFormat, const uint8_t uSamples, const uint8_t uMips, const uint8_t uBindFlags)
 {
-	create(uWidth, uHeight, uArraySize, eFormat, uSamples, uMips, bUAV);
+	create(uWidth, uHeight, uArraySize, eFormat, uSamples, uMips, uBindFlags);
 	const auto pTexture = m_pTexture.Get();
 
 	VEC_ALLOC(m_vvpRTVs, uArraySize);
@@ -212,15 +210,15 @@ void RenderTarget::Create(const uint32_t uWidth, const uint32_t uHeight, const u
 }
 
 void RenderTarget::Create(const uint32_t uWidth, const uint32_t uHeight, const DXGI_FORMAT eFormat,
-	const uint8_t uSamples, const uint8_t uMips, const bool bUAV)
+	const uint8_t uSamples, const uint8_t uMips, const uint8_t uBindFlags)
 {
-	Create(uWidth, uHeight, 1, eFormat, uSamples, uMips, bUAV);
+	Create(uWidth, uHeight, 1, eFormat, uSamples, uMips, uBindFlags);
 }
 
 void RenderTarget::CreateArray(const uint32_t uWidth, const uint32_t uHeight, const uint32_t uArraySize,
-	const DXGI_FORMAT eFormat, const uint8_t uSamples, const uint8_t uMips, const bool bUAV)
+	const DXGI_FORMAT eFormat, const uint8_t uSamples, const uint8_t uMips, const uint8_t uBindFlags)
 {
-	create(uWidth, uHeight, uArraySize, eFormat, uSamples, uMips, bUAV);
+	create(uWidth, uHeight, uArraySize, eFormat, uSamples, uMips, uBindFlags);
 	const auto pTexture = m_pTexture.Get();
 
 	VEC_ALLOC(m_vvpRTVs, 1);
@@ -297,11 +295,11 @@ const uint8_t RenderTarget::GetNumMips(const uint8_t uSlice) const
 }
 
 void RenderTarget::create(const uint32_t uWidth, const uint32_t uHeight, const uint32_t uArraySize,
-	const DXGI_FORMAT eFormat, const uint8_t uSamples, const uint8_t uMips, const bool bUAV)
+	const DXGI_FORMAT eFormat, const uint8_t uSamples, const uint8_t uMips, const uint8_t uBindFlags)
 {
 	// Setup the render target texture description.
 	const auto textureDesc = CD3D11_TEXTURE2D_DESC(eFormat, uWidth, uHeight, uArraySize, uMips,
-		D3D11_BIND_RENDER_TARGET | D3D11_BIND_SHADER_RESOURCE | (bUAV ? D3D11_BIND_UNORDERED_ACCESS : 0),
+		D3D11_BIND_RENDER_TARGET | D3D11_BIND_SHADER_RESOURCE | uBindFlags,
 		D3D11_USAGE_DEFAULT, 0, uSamples, 0, uMips == 1 ? 0 : D3D11_RESOURCE_MISC_GENERATE_MIPS);
 
 	// Create the render target texture.
@@ -311,7 +309,7 @@ void RenderTarget::create(const uint32_t uWidth, const uint32_t uHeight, const u
 	CreateSRV(uArraySize, uSamples);
 
 	// Create UAV
-	if (bUAV) CreateUAV(uArraySize, uMips);
+	if (uBindFlags & D3D11_BIND_UNORDERED_ACCESS) CreateUAV(uArraySize, uMips);
 }
 
 //--------------------------------------------------------------------------------------
@@ -330,29 +328,31 @@ DepthStencil::~DepthStencil()
 }
 
 void DepthStencil::Create(const uint32_t uWidth, const uint32_t uHeight, const uint32_t uArraySize,
-	const bool bSRV, DXGI_FORMAT eFormat, const uint8_t uSamples, const uint8_t uMips)
+	const DXGI_FORMAT eFormat, const uint8_t uBindFlags, const uint8_t uSamples, const uint8_t uMips)
 {
-	// Map formats
-	auto fmtTexture = DXGI_FORMAT_R24G8_TYPELESS;
-	auto fmtSRV = DXGI_FORMAT_R24_UNORM_X8_TYPELESS;
+	const auto bSRV = static_cast<bool>(uBindFlags & D3D11_BIND_SHADER_RESOURCE);
 
-	if (eFormat = DXGI_FORMAT_D32_FLOAT)
+	// Map formats
+	auto fmtTexture = DXGI_FORMAT_R32_TYPELESS;
+	auto fmtSRV = DXGI_FORMAT_R32_FLOAT;
+	
+	switch (eFormat)
 	{
-		fmtTexture = DXGI_FORMAT_R32_TYPELESS;
-		fmtSRV = DXGI_FORMAT_R32_FLOAT;
-	}
-	else if (eFormat = DXGI_FORMAT_D16_UNORM)
-	{
+	case DXGI_FORMAT_D24_UNORM_S8_UINT:
+		fmtTexture = DXGI_FORMAT_R24G8_TYPELESS;
+		fmtSRV = DXGI_FORMAT_R24_UNORM_X8_TYPELESS;
+		break;
+	case DXGI_FORMAT_D16_UNORM:
 		fmtTexture = DXGI_FORMAT_R16_TYPELESS;
 		fmtSRV = DXGI_FORMAT_R16_UNORM;
+		break;
 	}
 
 	// Setup the render depth stencil description.
 	{
 		const auto textureDesc = CD3D11_TEXTURE2D_DESC(
-			DXGI_FORMAT_R24G8_TYPELESS, uWidth, uHeight, uArraySize, uMips, bSRV ?
-			(D3D11_BIND_DEPTH_STENCIL | D3D11_BIND_SHADER_RESOURCE) :
-			D3D11_BIND_DEPTH_STENCIL, D3D11_USAGE_DEFAULT, 0, uSamples);
+			fmtTexture, uWidth, uHeight, uArraySize, uMips, D3D11_BIND_DEPTH_STENCIL | uBindFlags,
+			D3D11_USAGE_DEFAULT, 0, uSamples);
 
 		// Create the depth stencil texture.
 		ThrowIfFailed(m_pDXDevice->CreateTexture2D(&textureDesc, nullptr, &m_pTexture));
@@ -364,8 +364,7 @@ void DepthStencil::Create(const uint32_t uWidth, const uint32_t uHeight, const u
 		// Setup the description of the shader resource view.
 		const auto srvDesc = CD3D11_SHADER_RESOURCE_VIEW_DESC(uArraySize > 1 ?
 			(uSamples > 1 ? D3D11_SRV_DIMENSION_TEXTURE2DMSARRAY : D3D11_SRV_DIMENSION_TEXTURE2DARRAY) :
-			(uSamples > 1 ? D3D11_SRV_DIMENSION_TEXTURE2DMS : D3D11_SRV_DIMENSION_TEXTURE2D),
-			DXGI_FORMAT_R24_UNORM_X8_TYPELESS);
+			(uSamples > 1 ? D3D11_SRV_DIMENSION_TEXTURE2DMS : D3D11_SRV_DIMENSION_TEXTURE2D), fmtSRV);
 
 		// Create the shader resource view.
 		ThrowIfFailed(m_pDXDevice->CreateShaderResourceView(pTexture, &srvDesc, &m_pSRV));
@@ -380,8 +379,7 @@ void DepthStencil::Create(const uint32_t uWidth, const uint32_t uHeight, const u
 		// Setup the description of the depth stencil view.
 		auto dsvDesc = CD3D11_DEPTH_STENCIL_VIEW_DESC(uArraySize > 1 ?
 			(uSamples > 1 ? D3D11_DSV_DIMENSION_TEXTURE2DMSARRAY : D3D11_DSV_DIMENSION_TEXTURE2DARRAY) :
-			(uSamples > 1 ? D3D11_DSV_DIMENSION_TEXTURE2DMS : D3D11_DSV_DIMENSION_TEXTURE2D),
-			DXGI_FORMAT_D24_UNORM_S8_UINT, i);
+			(uSamples > 1 ? D3D11_DSV_DIMENSION_TEXTURE2DMS : D3D11_DSV_DIMENSION_TEXTURE2D), eFormat, i);
 
 		// Create the depth stencil view.
 		ThrowIfFailed(m_pDXDevice->CreateDepthStencilView(pTexture, &dsvDesc, &m_vpDSVs[i]));
@@ -399,10 +397,10 @@ void DepthStencil::Create(const uint32_t uWidth, const uint32_t uHeight, const u
 	}
 }
 
-void DepthStencil::Create(const uint32_t uWidth, const uint32_t uHeight, const bool bSRV,
-	DXGI_FORMAT eFormat, const uint8_t uSamples, const uint8_t uMips)
+void DepthStencil::Create(const uint32_t uWidth, const uint32_t uHeight, const DXGI_FORMAT eFormat,
+	const uint8_t uBindFlags, const uint8_t uSamples, const uint8_t uMips)
 {
-	Create(uWidth, uHeight, 1, bSRV, eFormat, uSamples, uMips);
+	Create(uWidth, uHeight, 1, eFormat, uBindFlags, uSamples, uMips);
 }
 
 const CPDXDepthStencilView &DepthStencil::GetDSV(const uint8_t uMip) const
@@ -440,13 +438,12 @@ Texture3D::~Texture3D()
 }
 
 void Texture3D::Create(const uint32_t uWidth, const uint32_t uHeight, const uint32_t uDepth,
-	const DXGI_FORMAT eFormat, const bool bUAV, const bool bSRV, const bool bDyn,
-	const uint8_t uMips, const lpcvoid pInitialData, const uint8_t uStride)
+	const DXGI_FORMAT eFormat, const uint8_t uBindFlags, const uint8_t uMips,
+	const lpcvoid pInitialData, const uint8_t uStride, const D3D11_USAGE eUsage)
 {
 	// Setup the texture description.
-	const auto textureDesc = CD3D11_TEXTURE3D_DESC(eFormat, uWidth, uHeight, uDepth,
-		uMips, D3D11_BIND_SHADER_RESOURCE | (bUAV ? D3D11_BIND_UNORDERED_ACCESS : 0),
-		bDyn ? D3D11_USAGE_DYNAMIC : D3D11_USAGE_DEFAULT, bDyn ? D3D11_CPU_ACCESS_WRITE : 0);
+	const auto textureDesc = CD3D11_TEXTURE3D_DESC(eFormat, uWidth, uHeight, uDepth, uMips,
+		uBindFlags, eUsage, eUsage == D3D11_USAGE_DYNAMIC ? D3D11_CPU_ACCESS_WRITE : 0);
 
 	if (pInitialData)
 	{
@@ -458,7 +455,7 @@ void Texture3D::Create(const uint32_t uWidth, const uint32_t uHeight, const uint
 	
 	// Create SRV
 	const auto pTexture = m_pTexture.Get();
-	if (bSRV)
+	if (uBindFlags & D3D11_BIND_SHADER_RESOURCE)
 	{
 		// Setup the description of the shader resource view.
 		const auto srvDesc = CD3D11_SHADER_RESOURCE_VIEW_DESC(pTexture);
@@ -482,7 +479,7 @@ void Texture3D::Create(const uint32_t uWidth, const uint32_t uHeight, const uint
 	}
 
 	// Create UAV
-	if (bUAV)
+	if (uBindFlags & D3D11_BIND_UNORDERED_ACCESS)
 	{
 		auto uMip = 0ui8;
 		VEC_ALLOC(m_vpUAVs, max(uMips, 1));
@@ -551,20 +548,17 @@ RawBuffer::~RawBuffer()
 {
 }
 
-void RawBuffer::Create(const uint32_t uByteWidth, const bool bVB, const bool bSO,
-	const bool bUAV, const bool bSRV, const bool bDyn,
-	const lpcvoid pInitialData, const uint8_t uUAVFlags)
+void RawBuffer::Create(const uint32_t uByteWidth, const uint8_t uBindFlags,
+	const lpcvoid pInitialData, const uint8_t uUAVFlags, const D3D11_USAGE eUsage)
 {
-	// Create RB
-	auto uBindFlag = bVB ? D3D11_BIND_VERTEX_BUFFER : 0;
-	uBindFlag |= bSO ? D3D11_BIND_STREAM_OUTPUT : 0;
-	uBindFlag |= bSRV ? D3D11_BIND_SHADER_RESOURCE : 0;
-	uBindFlag |= bUAV ? D3D11_BIND_UNORDERED_ACCESS : 0;
+	const auto bSRV = static_cast<bool>(uBindFlags & D3D11_BIND_SHADER_RESOURCE);
+	const auto bUAV = static_cast<bool>(uBindFlags & D3D11_BIND_UNORDERED_ACCESS);
 
-	auto bufferDesc = CD3D11_BUFFER_DESC(uByteWidth, uBindFlag,
-		bDyn ? D3D11_USAGE_DYNAMIC : D3D11_USAGE_DEFAULT,
-		bDyn ? D3D11_CPU_ACCESS_WRITE : 0);
-	bufferDesc.MiscFlags = bSRV || bUAV ? D3D11_RESOURCE_MISC_BUFFER_ALLOW_RAW_VIEWS : bufferDesc.MiscFlags;
+	// Create RB
+	auto bufferDesc = CD3D11_BUFFER_DESC(uByteWidth, uBindFlags, eUsage,
+		eUsage == D3D11_USAGE_DYNAMIC ? D3D11_CPU_ACCESS_WRITE : 0);
+	bufferDesc.MiscFlags = 
+		bSRV || bUAV ? D3D11_RESOURCE_MISC_BUFFER_ALLOW_RAW_VIEWS : bufferDesc.MiscFlags;
 
 	if (pInitialData)
 	{
@@ -627,13 +621,12 @@ TypedBuffer::~TypedBuffer()
 }
 
 void TypedBuffer::Create(const uint32_t uNumElements, const uint32_t uStride,
-	const DXGI_FORMAT eFormat, const bool bUAV, const bool bSRV, const bool bDyn,
-	const lpcvoid pInitialData, const uint8_t uUAVFlags)
+	const DXGI_FORMAT eFormat, const uint8_t uBindFlags, const lpcvoid pInitialData,
+	const uint8_t uUAVFlags, const D3D11_USAGE eUsage)
 {
-	// Create SB
-	const auto bufferDesc = CD3D11_BUFFER_DESC(uNumElements * uStride,
-		D3D11_BIND_SHADER_RESOURCE | (bUAV ? D3D11_BIND_UNORDERED_ACCESS : 0),
-		bDyn ? D3D11_USAGE_DYNAMIC : D3D11_USAGE_DEFAULT, bDyn ? D3D11_CPU_ACCESS_WRITE : 0);
+	// Create TB
+	const auto bufferDesc = CD3D11_BUFFER_DESC(uNumElements * uStride, uBindFlags,
+		eUsage, eUsage == D3D11_USAGE_DYNAMIC ? D3D11_CPU_ACCESS_WRITE : 0);
 
 	if (pInitialData)
 	{
@@ -643,10 +636,10 @@ void TypedBuffer::Create(const uint32_t uNumElements, const uint32_t uStride,
 	else ThrowIfFailed(m_pDXDevice->CreateBuffer(&bufferDesc, nullptr, &m_pBuffer));
 
 	// Create SRV
-	if (bSRV) CreateSRV(uNumElements, eFormat);
+	if (uBindFlags & D3D11_BIND_SHADER_RESOURCE) CreateSRV(uNumElements, eFormat);
 
 	// Create UAV
-	if (bUAV)
+	if (uBindFlags & D3D11_BIND_UNORDERED_ACCESS)
 	{
 		const auto pBuffer = m_pBuffer.Get();
 
@@ -684,13 +677,13 @@ StructuredBuffer::~StructuredBuffer()
 {
 }
 
-void StructuredBuffer::Create(const uint32_t uNumElements, const uint32_t uStride, const bool bUAV,
-	const bool bDyn, const bool bSRV, const lpcvoid pInitialData, const uint8_t uUAVFlags)
+void StructuredBuffer::Create(const uint32_t uNumElements, const uint32_t uStride,
+	const uint8_t uBindFlags, const lpcvoid pInitialData, const uint8_t uUAVFlags,
+	const D3D11_USAGE eUsage)
 {
 	// Create SB
-	const auto bufferDesc = CD3D11_BUFFER_DESC(uNumElements * uStride,
-		D3D11_BIND_SHADER_RESOURCE | (bUAV ? D3D11_BIND_UNORDERED_ACCESS : 0),
-		bDyn ? D3D11_USAGE_DYNAMIC : D3D11_USAGE_DEFAULT, bDyn ? D3D11_CPU_ACCESS_WRITE : 0,
+	const auto bufferDesc = CD3D11_BUFFER_DESC(uNumElements * uStride, uBindFlags,
+		eUsage, eUsage == D3D11_USAGE_DYNAMIC ? D3D11_CPU_ACCESS_WRITE : 0,
 		D3D11_RESOURCE_MISC_BUFFER_STRUCTURED, uStride);
 
 	if (pInitialData)
@@ -701,10 +694,10 @@ void StructuredBuffer::Create(const uint32_t uNumElements, const uint32_t uStrid
 	else ThrowIfFailed(m_pDXDevice->CreateBuffer(&bufferDesc, nullptr, &m_pBuffer));
 
 	// Create SRV
-	if (bSRV) CreateSRV(uNumElements);
+	if (uBindFlags & D3D11_BIND_SHADER_RESOURCE) CreateSRV(uNumElements);
 
 	// Create UAV
-	if (bUAV)
+	if (uBindFlags & D3D11_BIND_UNORDERED_ACCESS)
 	{
 		const auto pBuffer = m_pBuffer.Get();
 
