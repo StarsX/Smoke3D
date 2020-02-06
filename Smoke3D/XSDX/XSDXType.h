@@ -20,28 +20,28 @@ namespace XSDX
 	template<typename T, size_t S>
 	inline T& dref(std::_Array_iterator<T, S> &p)
 	{
-		assert(p._Ptr);
+		assert(p->_Unwrapped());
 		return p[0];
 	}
 
 	template<typename T, size_t S>
 	inline const T dref(std::_Array_const_iterator<T, S> &p)
 	{
-		assert(p._Ptr);
+		assert(p._Unwrapped());
 		return p[0];
 	}
 
 	template<typename T>
 	inline T& dref(std::_Vector_iterator<std::_Vector_val<std::_Simple_types<T>>> &p)
 	{
-		assert(p._Ptr);
+		assert(p._Unwrapped());
 		return p[0];
 	}
 
 	template<typename T>
 	inline const T dref(std::_Vector_const_iterator<std::_Vector_val<std::_Simple_types<T>>> &p)
 	{
-		assert(p._Ptr);
+		assert(p._Unwrapped());
 		return p[0];
 	}
 
